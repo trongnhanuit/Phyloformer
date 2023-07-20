@@ -3,6 +3,8 @@ import os
 import subprocess
 
 from tqdm import tqdm
+from multiprocessing import Pool
+from functools import partial
 
 SEQGEN_MODELS = [
     "JTT",
@@ -17,21 +19,25 @@ SEQGEN_MODELS = [
     "GENERAL",
 ]
 
+def simulate_an_alignment(tree, in_dir, out_dir, seq_gen_path, model, len_seq):
+    in_path = os.path.join(in_dir, tree + ".nwk")
+    out_path = os.path.join(out_dir, tree + ".fasta")
+    bash_cmd = (
+        f"{seq_gen_path} -m{model} -q -of -l {len_seq} < {in_path} > {out_path}"
+    )
+    process = subprocess.Popen(bash_cmd, shell=True, stdout=subprocess.PIPE)
+    output, error = process.communicate()
 
-def simulate_alignments(in_dir, out_dir, seq_gen_path, model, len_seq):
+def simulate_alignments(in_dir, out_dir, seq_gen_path, model, len_seq, nprocesses):
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
 
     trees = [item[:-4] for item in os.listdir(in_dir) if item[-4:] == ".nwk"]
 
-    for tree in tqdm(trees):
-        in_path = os.path.join(in_dir, tree + ".nwk")
-        out_path = os.path.join(out_dir, tree + ".fasta")
-        bash_cmd = (
-            f"{seq_gen_path} -m{model} -q -of -l {len_seq} < {in_path} > {out_path}"
-        )
-        process = subprocess.Popen(bash_cmd, shell=True, stdout=subprocess.PIPE)
-        output, error = process.communicate()
+    pool = Pool(nprocesses)                         # Create a multiprocessing Pool
+    with tqdm(total=len(trees)) as pbar:
+        for _ in pool.imap_unordered(partial(simulate_an_alignment, in_dir=in_dir, out_dir=out_dir, seq_gen_path=seq_gen_path, model=model, len_seq=len_seq), trees):
+            pbar.update()
 
 
 def main():
@@ -73,9 +79,10 @@ def main():
         help=f'model of evolution. Allowed values: [{", ".join(SEQGEN_MODELS)}]',
         metavar="MODEL",
     )
+    parser.add_argument('-p', '--nprocesses', type=int, required=True, help='number of processes (default:1)', default=1)
     args = parser.parse_args()
 
-    simulate_alignments(args.input, args.output, args.seqgen, args.model, args.length)
+    simulate_alignments(args.input, args.output, args.seqgen, args.model, args.length, args.nprocesses)
 
 
 if __name__ == "__main__":
