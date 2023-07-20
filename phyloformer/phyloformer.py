@@ -242,7 +242,7 @@ class AttentionNet(nn.Module):
         )
 
     def infer_dm(
-        self, X: torch.Tensor, ids: Optional[list[str]] = None
+        self, X: torch.Tensor, ids: Optional[List[str]] = None
     ) -> skbio.DistanceMatrix:
         """Infers a phylogenetic distance matrix from embedded alignment tensor
 
@@ -294,7 +294,7 @@ class AttentionNet(nn.Module):
     def infer_tree(
         self,
         X: torch.Tensor,
-        ids: Optional[list[str]] = None,
+        ids: Optional[List[str]] = None,
         dm: Optional[skbio.DistanceMatrix] = None,
     ) -> Tree:
         """Infers a phylogenetic tree from an embedded alignment tensor
