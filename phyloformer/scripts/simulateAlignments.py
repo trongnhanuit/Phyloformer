@@ -22,11 +22,14 @@ SEQGEN_MODELS = [
 def simulate_an_alignment(tree, in_dir, out_dir, seq_gen_path, model, len_seq):
     in_path = os.path.join(in_dir, tree + ".nwk")
     out_path = os.path.join(out_dir, tree + ".fasta")
-    bash_cmd = (
-        f"{seq_gen_path} -m{model} -q -of -l {len_seq} < {in_path} > {out_path}"
-    )
-    process = subprocess.Popen(bash_cmd, shell=True, stdout=subprocess.PIPE)
-    output, error = process.communicate()
+
+    # if the file exists -> ignore
+    if (not (os.path.isfile(out_path) and os.path.getsize(out_path) > 0)):
+        bash_cmd = (
+            f"{seq_gen_path} -m{model} -q -of -l {len_seq} < {in_path} > {out_path}"
+        )
+        process = subprocess.Popen(bash_cmd, shell=True, stdout=subprocess.PIPE)
+        output, error = process.communicate()
 
 def simulate_alignments(in_dir, out_dir, seq_gen_path, model, len_seq, nprocesses):
     if not os.path.exists(out_dir):

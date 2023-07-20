@@ -12,33 +12,35 @@ def simulate_a_tree(tree_id, numleaves, outdir, treeType, bl):
     # Generating the tree topology
     outname = ""
     outname = os.path.join(outdir, str(tree_id) + "_" + str(numleaves) + "_leaves.nwk")
-    if treeType == "birth-death":  # using dendropy
-        t = treesim.birth_death_tree(
-            birth_rate=1.0, death_rate=0.5, num_extant_tips=numleaves
-        )
-        t.write(path=outname, schema="newick", suppress_rooting=True)
-    elif treeType == "uniform":  # using ete3
-        t = Tree()
-        t.populate(numleaves)
-        t.write(format=1, outfile=outname)
-    else:
-        exit("Error, treetype should be birth-death or uniform")
-    t = Tree(outname)
-
-    # Assigning the branch lengths
-    for node in t.traverse("postorder"):
-        if node.is_root():
-            pass
+    # if the file exists -> ignore
+    if (not (os.path.isfile(outname) and os.path.getsize(outname) > 0)):
+        if treeType == "birth-death":  # using dendropy
+            t = treesim.birth_death_tree(
+                birth_rate=1.0, death_rate=0.5, num_extant_tips=numleaves
+            )
+            t.write(path=outname, schema="newick", suppress_rooting=True)
+        elif treeType == "uniform":  # using ete3
+            t = Tree()
+            t.populate(numleaves)
+            t.write(format=1, outfile=outname)
         else:
-            if bl == "uniform":
-                node.dist = np.random.uniform(low=0.002, high=1.0, size=None)
-            elif bl == "exponential":
-                node.dist = np.random.exponential(0.15, size=None)
+            exit("Error, treetype should be birth-death or uniform")
+        t = Tree(outname)
+
+        # Assigning the branch lengths
+        for node in t.traverse("postorder"):
+            if node.is_root():
+                pass
             else:
-                exit(
-                    "Error, branch length distribution should be uniform or exponential"
-                )
-    t.write(format=1, outfile=outname)
+                if bl == "uniform":
+                    node.dist = np.random.uniform(low=0.002, high=1.0, size=None)
+                elif bl == "exponential":
+                    node.dist = np.random.exponential(0.15, size=None)
+                else:
+                    exit(
+                        "Error, branch length distribution should be uniform or exponential"
+                    )
+        t.write(format=1, outfile=outname)
 
 def simulate_trees(numtrees, numleaves, outdir, treeType, bl, nprocesses):
     if not os.path.exists(outdir):
