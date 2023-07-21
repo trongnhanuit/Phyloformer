@@ -157,6 +157,7 @@ def training_loop(
     no_improvement_counter = 0
     best_model = copy.deepcopy(model)
     best_loss = None
+    #model = torch.nn.DataParallel(model, device_ids=[0, 1])
     model = model.to(device)
     train_losses, val_losses = [], []
     val_MAEs, val_MREs = [], []

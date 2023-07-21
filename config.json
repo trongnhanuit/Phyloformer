@@ -1,7 +1,7 @@
 {
-  "batch_size": 4,
+  "batch_size": 12,
   "epochs": 185,
-  "learning_rate": 0.00039,
+  "learning_rate": 0.0004,
   "optimizer": "Adam",
   "loss": "L2",
   "n_blocks": 6,
