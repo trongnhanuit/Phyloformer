@@ -157,6 +157,10 @@ def main():
         model, optimizer, scheduler, criterion, _ = load_checkpoint(
             args.load, device=device
         )
+        # NHANLT
+        # extract model from checkpoint
+        #model.save(args.load + ".best_model.pt")
+        #exit(0)
     else:
         model = AttentionNet(**config)
         model.to(device)
