@@ -114,6 +114,13 @@ def main():
         default=f"training-{datetime.now()}.log",
         help="path to save log at",
     )
+    parser.add_argument(
+        "--earlystop",
+        required=False,
+        default=False,
+        action='store_true',
+        help="True to to stop trainig early if there is no improvement of validation loss",
+    )
     args = parser.parse_args()
 
     with open(args.config, "r") as config_file:
@@ -207,6 +214,7 @@ def main():
         criterion,
         train_data,
         val_data,
+        early_stopping=args.earlystop,
         epochs=config["epochs"],
         config=config,
         log_file=log_file,
