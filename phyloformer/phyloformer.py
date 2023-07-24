@@ -378,8 +378,9 @@ def load_model(path: str, device: str = "cpu", single_gpu: bool = True) -> Atten
             "Error loading model. Saved file must contain both a 'state_dict' "
             "and a 'architecture' entry"
         )
-
-    loaded["architecture"].pop("device")
+    # NHANLT
+    # avoid keyError
+    # loaded["architecture"].pop("device")
     model = AttentionNet(**loaded["architecture"], device=device)
     _init_model(model, loaded["state_dict"], single_gpu)
     model.to(device)
