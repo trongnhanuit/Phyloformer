@@ -150,6 +150,7 @@ def training_loop(
     if log_file is not None:
         losses_file = open(log_file, "w+")
         losses_file.write("timestamp,epoch,train_loss,val_loss,val_MAE,val_MRE\n")
+        losses_file.close()
 
     if device == "cuda":
         scaler = GradScaler()
@@ -221,9 +222,11 @@ def training_loop(
 
         # Logging
         if losses_file is not None:
+            losses_file = open(log_file, "a")
             losses_file.write(
                 f"{time()},{epoch},{train_losses[-1]},{val_losses[-1]},{val_MAEs[-1]},{val_MREs[-1]}\n"
             )
+            losses_file.close()
         if tensorboard_writer is not None:
             tensorboard_writer.add_scalars(
                 "Losses", {"train": train_losses[-1], "val": val_losses[-1]}, epoch
@@ -245,7 +248,7 @@ def training_loop(
             best_model = copy.deepcopy(model)
             # NHANLT
             # write the best model
-            best_model.save(os.path.join(best_path, f".best_model.pt"))
+            best_model.save(best_path + ".best_model.pt")
             if best_path is not None:
                 save_checkpoint(model, optimizer, scheduler, config, best_path)
         else:
