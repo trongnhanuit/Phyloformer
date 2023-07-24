@@ -1,6 +1,6 @@
 """The training submodule contains necessary functions to train a Phyloformer network
 """
-
+import os
 import copy
 import math
 from contextlib import nullcontext
@@ -243,6 +243,9 @@ def training_loop(
             no_improvement_counter = 0
             best_loss = val_losses[-1]
             best_model = copy.deepcopy(model)
+            # NHANLT
+            # write the best model
+            best_model.save(os.path.join(best_path, f".best_model.pt"))
             if best_path is not None:
                 save_checkpoint(model, optimizer, scheduler, config, best_path)
         else:
