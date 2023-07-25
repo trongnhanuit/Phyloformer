@@ -158,7 +158,12 @@ def training_loop(
     no_improvement_counter = 0
     best_model = copy.deepcopy(model)
     best_loss = None
-    #model = torch.nn.DataParallel(model, device_ids=[0, 1])
+    if device == "cuda":
+        if torch.cuda.device_count() > 1:
+            print("Using ", torch.cuda.device_count(), " GPUs")
+            model = torch.nn.DataParallel(model)
+        else:
+            print("Using a single GPU")
     model = model.to(device)
     train_losses, val_losses = [], []
     val_MAEs, val_MREs = [], []
@@ -175,6 +180,14 @@ def training_loop(
             with (autocast() if device == "cuda" and amp else nullcontext()):
                 optimizer.zero_grad()
                 outputs, _ = model(inputs)
+                print("Outside: Input size: ", inputs.size(), " on device ", inputs.get_device(), "; Output size: ", outputs.size(), " on device ", outputs.get_device())
+                # NHANLT
+                # Debug
+                #print("Data \t Device")
+                #print("x_train \t ", x_train.get_device())
+                #print("y_train \t ", y_train.get_device())
+                #print("inputs \t ", inputs.get_device())
+                #print("outputs \t ", outputs.get_device())
                 y_train = torch.squeeze(y_train.type_as(outputs))
                 train_loss = criterion(outputs, y_train)
                 if device == "cuda" and amp:
@@ -205,6 +218,14 @@ def training_loop(
                 inputs = x_val.float()
                 with (autocast() if device == "cuda" and amp else nullcontext()):
                     outputs, _ = model(inputs)
+                    print("Validate. inputs size: ", inputs.size(), " on device ", inputs.get_device(), ". outputs size: ", outputs.size(), " on device ", outputs.get_device(), ". y_val size: ", y_val.size(), " on device ", y_val.get_device())
+                    # NHANLT
+                    # Debug
+                    # print("Data \t Device")
+                    # print("x_val \t ", x_val.get_device())
+                    # print("y_val \t ", y_val.get_device())
+                    # print("inputs \t ", inputs.get_device())
+                    # print("outputs \t ", outputs.get_device())
                     y_val = torch.squeeze(y_val.type_as(outputs))
                     val_loss = criterion(outputs, y_val).item()
                     val_MAE = MAE(outputs, y_val)
@@ -248,7 +269,10 @@ def training_loop(
             best_model = copy.deepcopy(model)
             # NHANLT
             # write the best model
-            best_model.save(best_path + ".best_model.pt")
+            if isinstance(best_model, torch.nn.DataParallel):
+                best_model.module.save(best_path + ".best_model.pt")
+            else:
+                best_model.save(best_path + ".best_model.pt")
             if best_path is not None:
                 save_checkpoint(model, optimizer, scheduler, config, best_path)
         else:
@@ -288,10 +312,15 @@ def save_checkpoint(
     path : str
         Path to save the checkpoint to
     """
+    if isinstance(model, torch.nn.DataParallel):
+        tmp_model = model.module
+    else:
+        tmp_model = model
+
     checkpoint = {
         "model": {
-            "architecture": model._get_architecture(),
-            "state_dict": model.state_dict(),
+            "architecture": tmp_model._get_architecture(),
+            "state_dict": tmp_model.state_dict(),
         },
         "optimizer": optimizer.state_dict(),
         "scheduler": scheduler.state_dict(),

@@ -165,7 +165,15 @@ class AttentionNet(nn.Module):
         # 2D convolution that gives us the features in the third dimension
         # (i.e. initial embedding of each amino acid)
         out = self.block_1_1(x)
+        self.seq2pair = self.seq2pair.to(self.device)
         out = torch.matmul(self.seq2pair, out.transpose(-1, -2))  # pair representation
+
+        # NHANLT
+        # Debug
+        print("\t In Model: out size", out.size(), " on device ", out.get_device())
+        #print("Data \t Device")
+        #print("seq2pair \t ", self.seq2pair.get_device())
+        #print("out \t ", out.get_device())
 
         # From here on the tensor has shape (batch_size,features,nb_pairs,seq_len), all
         # the transpose/permute allow to apply layernorm and attention over the desired
