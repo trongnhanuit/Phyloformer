@@ -7,8 +7,15 @@ from ete3 import Tree
 from tqdm import tqdm
 from multiprocessing import Pool
 from functools import partial
+from datetime import datetime
+import random
 
-def simulate_a_tree(tree_id, numleaves, outdir, treeType, bl):
+def simulate_a_tree(tree_id, start_seed, numleaves, outdir, treeType, bl):
+    # set random seed num
+    random.seed(start_seed + tree_id)
+    np.random.seed(start_seed + tree_id)
+    #print(start_seed + tree_id)
+
     # Generating the tree topology
     outname = ""
     outname = os.path.join(outdir, str(tree_id) + "_" + str(numleaves) + "_leaves.nwk")
@@ -46,9 +53,12 @@ def simulate_trees(numtrees, numleaves, outdir, treeType, bl, nprocesses):
     if not os.path.exists(outdir):
         os.mkdir(outdir)
 
+    # initialize start_seed number from the current time
+    start_seed = int(datetime.now().timestamp())
+
     pool = Pool(nprocesses)                         # Create a multiprocessing Pool
     with tqdm(total=numtrees) as pbar:
-        for _ in pool.imap_unordered(partial(simulate_a_tree, numleaves = numleaves, outdir = outdir, treeType = treeType, bl = bl), range(numtrees)):
+        for _ in pool.imap_unordered(partial(simulate_a_tree, start_seed = start_seed, numleaves = numleaves, outdir = outdir, treeType = treeType, bl = bl), range(numtrees)):
             pbar.update()
 
     with open(os.path.join(outdir, "stdout.txt"), "a") as fout:
@@ -101,6 +111,9 @@ def main():
     )
     parser.add_argument('-p', '--nprocesses', type=int, required=True, help='number of processes (default:1)', default=1)
     args = parser.parse_args()
+
+    if (args.topology == "birth-death" and args.nprocesses > 1):
+        print("Be careful! We've yet set an unique random seed number for each process when generating tree with birth-death model. Some random trees may be identical to each other (by chance)!")
 
     simulate_trees(
         args.ntrees, args.nleaves, args.output, args.topology, args.branchlength, args.nprocesses

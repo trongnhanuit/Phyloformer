@@ -5,6 +5,7 @@ import subprocess
 from tqdm import tqdm
 from multiprocessing import Pool
 from functools import partial
+from datetime import datetime
 
 SEQGEN_MODELS = [
     "JTT",
@@ -19,14 +20,20 @@ SEQGEN_MODELS = [
     "GENERAL",
 ]
 
-def simulate_an_alignment(tree, in_dir, out_dir, seq_gen_path, model, len_seq):
+def simulate_an_alignment(tree_enum, in_dir, out_dir, seq_gen_path, model, len_seq, start_seed):
+    tree_index, tree = tree_enum
     in_path = os.path.join(in_dir, tree + ".nwk")
     out_path = os.path.join(out_dir, tree + ".fasta")
+
+    # init random seed num
+    seed_num = start_seed + tree_index
+    #print(seed_num)
+    #print(tree)
 
     # if the file exists -> ignore
     if (not (os.path.isfile(out_path) and os.path.getsize(out_path) > 0)):
         bash_cmd = (
-            f"{seq_gen_path} -m{model} -q -of -l {len_seq} < {in_path} > {out_path}"
+            f"{seq_gen_path} -m{model} -q -of -l {len_seq} -z {seed_num} < {in_path} > {out_path}"
         )
         process = subprocess.Popen(bash_cmd, shell=True, stdout=subprocess.PIPE)
         output, error = process.communicate()
@@ -37,9 +44,12 @@ def simulate_alignments(in_dir, out_dir, seq_gen_path, model, len_seq, nprocesse
 
     trees = [item[:-4] for item in os.listdir(in_dir) if item[-4:] == ".nwk"]
 
+    # initialize start_seed number from the current time
+    start_seed = int(datetime.now().timestamp())
+
     pool = Pool(nprocesses)                         # Create a multiprocessing Pool
     with tqdm(total=len(trees)) as pbar:
-        for _ in pool.imap_unordered(partial(simulate_an_alignment, in_dir=in_dir, out_dir=out_dir, seq_gen_path=seq_gen_path, model=model, len_seq=len_seq), trees):
+        for _ in pool.imap_unordered(partial(simulate_an_alignment, in_dir=in_dir, out_dir=out_dir, seq_gen_path=seq_gen_path, model=model, len_seq=len_seq, start_seed=start_seed), enumerate(trees)):
             pbar.update()
 
 
