@@ -225,7 +225,10 @@ def main():
     )
 
     print(f"\nBest model gotten after {epoch} epochs!")
-    best_model.save(os.path.join(args.output, f"{identifier}.best_model.pt"))
+    if isinstance(best_model, torch.nn.DataParallel):
+        best_model.module.save(os.path.join(args.output, f"{identifier}.best_model.pt"))
+    else:
+        best_model.save(os.path.join(args.output, f"{identifier}.best_model.pt"))
 
     # Cleanup
     if tb_writer is not None:
