@@ -214,7 +214,7 @@ class AttentionNet(nn.Module):
 
         # NHANLT
         # Debug
-        print("\t In Model: out size", out.shape, " on device ", out.get_device())
+        # print("\t In Model: out size", out.shape, " on device ", out.get_device())
         # print("Data \t Device")
         # print("seq2pair \t ", self.seq2pair.get_device())
         # print("out \t ", out.get_device())
