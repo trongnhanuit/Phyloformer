@@ -174,8 +174,10 @@ def training_loop(
         epoch_train_losses = []
         for batch in train_data:
             x_train, y_train = batch
-            x_train, y_train = x_train.to(device), y_train.to(device)
+            #x_train, y_train = x_train.to(device), y_train.to(device)
+            y_train = y_train.to(device)
             inputs = x_train.float()
+            inputs = inputs.to(device)
 
             with (autocast() if device == "cuda" and amp else nullcontext()):
                 optimizer.zero_grad()
@@ -212,10 +214,12 @@ def training_loop(
             epoch_MAEs, epoch_MREs, epoch_val_losses = [], [], []
             for batch in val_data:
                 x_val, y_val = batch
-                x_val, y_val = x_val.to(device), y_val.to(device)
+                #x_val, y_val = x_val.to(device), y_val.to(device)
+                y_val = y_val.to(device)
 
                 model.eval()
                 inputs = x_val.float()
+                inputs = inputs.to(device)
                 with (autocast() if device == "cuda" and amp else nullcontext()):
                     outputs, _ = model(inputs)
                     print("Validate. inputs size: ", inputs.size(), " on device ", inputs.get_device(), ". outputs size: ", outputs.size(), " on device ", outputs.get_device(), ". y_val size: ", y_val.size(), " on device ", y_val.get_device())
