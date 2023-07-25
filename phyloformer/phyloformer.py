@@ -168,13 +168,6 @@ class AttentionNet(nn.Module):
         self.seq2pair = self.seq2pair.to(self.device)
         out = torch.matmul(self.seq2pair, out.transpose(-1, -2))  # pair representation
 
-        # NHANLT
-        # Debug
-        print("\t In Model: out size", out.size(), " on device ", out.get_device())
-        #print("Data \t Device")
-        #print("seq2pair \t ", self.seq2pair.get_device())
-        #print("out \t ", out.get_device())
-
         # From here on the tensor has shape (batch_size,features,nb_pairs,seq_len), all
         # the transpose/permute allow to apply layernorm and attention over the desired
         # dimensions and are then followed by the inverse transposition/permutation
@@ -213,6 +206,18 @@ class AttentionNet(nn.Module):
         # Averaging over positions and removing the extra dimensions
         # we finally get (batch_size,nb_pairs)
         out = torch.squeeze(torch.mean(out, dim=-1))
+
+        # NHANLT
+        # if batch_size = 1 return (1,nb_pairs) instead of (nb_pairs)
+        if len(list(out.shape)) == 1:
+            out = out.reshape(1,-1)
+
+        # NHANLT
+        # Debug
+        print("\t In Model: out size", out.shape, " on device ", out.get_device())
+        # print("Data \t Device")
+        # print("seq2pair \t ", self.seq2pair.get_device())
+        # print("out \t ", out.get_device())
 
         return out, attentionmaps
 
