@@ -179,6 +179,14 @@ def training_loop(
             inputs = x_train.float()
             inputs = inputs.to(device)
 
+            print("x_train size: ", x_train.size(), "; inputs size: ", inputs.size())
+            print("x_train[0] size: ", x_train[0].size(), "; inputs[0] size: ", inputs[0].size())
+            print(x_train[0])
+
+            print("inputs")
+            print(inputs[0])
+
+
             with (autocast() if device == "cuda" and amp else nullcontext()):
                 optimizer.zero_grad()
                 outputs, _ = model(inputs)

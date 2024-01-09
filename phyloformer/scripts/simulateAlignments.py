@@ -92,7 +92,7 @@ def main():
         help=f'model of evolution. Allowed values: [{", ".join(SEQGEN_MODELS)}]',
         metavar="MODEL",
     )
-    parser.add_argument('-p', '--nprocesses', type=int, required=True, help='number of processes (default:1)', default=1)
+    parser.add_argument('-p', '--nprocesses', type=int, required=False, help='number of processes (default:1)', default=1)
     args = parser.parse_args()
 
     simulate_alignments(args.input, args.output, args.seqgen, args.model, args.length, args.nprocesses)

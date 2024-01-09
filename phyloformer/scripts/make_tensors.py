@@ -65,7 +65,7 @@ def main():
         type=str,
         help="path to output directory (default: current directory)",
     )
-    parser.add_argument('-p', '--nprocesses', type=int, required=True, help='number of processes (default:1)', default=1)
+    parser.add_argument('-p', '--nprocesses', type=int, required=False, help='number of processes (default:1)', default=1)
     args = parser.parse_args()
 
     if not os.path.exists(args.output):
