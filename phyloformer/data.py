@@ -113,6 +113,41 @@ def _read_distances_from_tree(
 
     return distances
 
+def _read_distances_from_file(
+    path: str, normalize: bool = False
+) -> Dict[Tuple[str, str], float]:
+    """Reads the distance matrix from a file
+
+    Parameters
+    ----------
+    path : str
+        Path to the file that contains pairwise distances
+    normalize : bool, optional
+        Whether to normalize distances or not, by default False
+
+    Returns
+    -------
+    Dict[Tuple[str, str], float]
+        A dictionary representing the triangular distance matrix with:
+         - as keys: a tuple of the leaf ids between which the distance is computed
+         - as values: the distances
+
+    """
+    distances = dict()
+    with open(path, newline='') as input_file:
+        for line in input_file:
+            if (len(line) == 0):
+                continue
+            values = line.split('\t')
+            distances[(values[0], values[1])] = float(values[2])
+
+    if normalize:
+        diameter = max(distances.values())
+        for key in distances:
+            distances[key] /= diameter
+
+    return distances
+
 
 def load_tree(path: str) -> Tuple[torch.Tensor, List[Tuple[str, str]]]:
     """Loads a tree as a tensor of pairwise distances, digestible by the Phyloformer
@@ -133,6 +168,32 @@ def load_tree(path: str) -> Tuple[torch.Tensor, List[Tuple[str, str]]]:
 
     """
     distances = _read_distances_from_tree(path)
+    tensor, ids = [], []
+    for pair, distance in distances.items():
+        tensor.append(distance)
+        ids.append(pair)
+
+    return (torch.tensor(tensor), ids)
+
+def load_connected_region(path: str) -> Tuple[torch.Tensor, List[Tuple[str, str]]]:
+    """Loads a connected region as a tensor of pairwise distances, digestible by the Phyloformer
+    network
+
+    Parameters
+    ----------
+    path : str
+        Path to the file that contains the pairwise distances
+
+    Returns
+    -------
+    Tuple[torch.Tensor, List[Tuple[str, str]]]
+        a tuple containing:
+         - a tensor representing the distance matrix (shape 1\*n_pairs)
+         - a list of tuples of ids indicating between which leafs the distance was
+           computed
+
+    """
+    distances = _read_distances_from_file(path)
     tensor, ids = [], []
     for pair, distance in distances.items():
         tensor.append(distance)

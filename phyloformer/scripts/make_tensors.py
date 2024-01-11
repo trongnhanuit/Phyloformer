@@ -13,7 +13,7 @@ path_root = Path(__file__).parents[2]
 sys.path.append(str(path_root))
 #print(sys.path)
 
-from phyloformer.data import load_alignment, load_tree
+from phyloformer.data import load_alignment, load_tree, load_connected_region
 
 def process_a_tree(tree_file, tree_dir: str, aln_dir: str, out_dir: str):
     identifier = tree_file.rstrip(".nwk")
@@ -30,6 +30,21 @@ def process_a_tree(tree_file, tree_dir: str, aln_dir: str, out_dir: str):
             os.path.join(out_dir, f"{identifier}.tensor_pair"),
         )
 
+def process_a_connected_region(dis_mat_file, connected_region_dir: str, aln_dir: str, out_dir: str):
+    identifier = dis_mat_file.rstrip(".txt")
+    filename = os.path.join(out_dir, f"{identifier}.tensor_pair")
+
+    # if the file exists -> ignore
+    if (not (os.path.isfile(filename) and os.path.getsize(filename) > 0)):
+        #pbar.set_description(f"Processing {identifier}")
+        tree_tensor, _ = load_connected_region(os.path.join(connected_region_dir, dis_mat_file))
+        aln_tensor, _ = load_alignment(os.path.join(aln_dir, f"{identifier}.fasta"))
+
+        torch.save(
+            {"X": aln_tensor, "y": tree_tensor},
+            os.path.join(out_dir, f"{identifier}.tensor_pair"),
+        )
+
 def make_tensors(tree_dir: str, aln_dir: str, out_dir: str, nprocesses):
     trees = [file for file in os.listdir(tree_dir) if file.endswith(".nwk")]
 
@@ -38,6 +53,13 @@ def make_tensors(tree_dir: str, aln_dir: str, out_dir: str, nprocesses):
         for _iter in pool.imap_unordered(partial(process_a_tree, tree_dir=tree_dir, aln_dir=aln_dir, out_dir=out_dir), trees):
             pbar.update()
 
+def make_tensors_from_connected_regions(connected_region_dir: str, aln_dir: str, out_dir: str, nprocesses):
+    connected_regions = [file for file in os.listdir(connected_region_dir) if file.endswith(".txt")]
+
+    pool = Pool(nprocesses)                         # Create a multiprocessing Pool
+    with tqdm(total=len(connected_regions)) as pbar:
+        for _iter in pool.imap_unordered(partial(process_a_connected_region, connected_region_dir=connected_region_dir, aln_dir=aln_dir, out_dir=out_dir), connected_regions):
+            pbar.update()
 
 def main():
     parser = argparse.ArgumentParser(
@@ -65,13 +87,24 @@ def main():
         type=str,
         help="path to output directory (default: current directory)",
     )
+    parser.add_argument(
+        "-con_reg",
+        "--connected_region",
+        required=False,
+        default=False,
+        action = 'store_true',
+        help="TRUE to use connected regions instead of trees",
+    )
     parser.add_argument('-p', '--nprocesses', type=int, required=False, help='number of processes (default:1)', default=1)
     args = parser.parse_args()
 
     if not os.path.exists(args.output):
         os.mkdir(args.output)
 
-    make_tensors(args.treedir, args.alidir, args.output, args.nprocesses)
+    if args.connected_region:
+        make_tensors_from_connected_regions(args.treedir, args.alidir, args.output, args.nprocesses)
+    else:
+        make_tensors(args.treedir, args.alidir, args.output, args.nprocesses)
 
 
 if __name__ == "__main__":
