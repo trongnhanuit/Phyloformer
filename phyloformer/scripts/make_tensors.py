@@ -13,7 +13,7 @@ path_root = Path(__file__).parents[2]
 sys.path.append(str(path_root))
 #print(sys.path)
 
-from phyloformer.data import load_alignment, load_tree, load_connected_region
+from phyloformer.data import load_alignment, load_tree, load_connected_region, load_partial_lhs
 
 def process_a_tree(tree_file, tree_dir: str, aln_dir: str, out_dir: str):
     identifier = tree_file.rstrip(".nwk")
@@ -25,12 +25,18 @@ def process_a_tree(tree_file, tree_dir: str, aln_dir: str, out_dir: str):
         tree_tensor, _ = load_tree(os.path.join(tree_dir, tree_file))
         aln_tensor, _ = load_alignment(os.path.join(aln_dir, f"{identifier}.fasta"))
 
+        # Debug
+        print("Tree tensor shape:")
+        print(tree_tensor.shape)
+        print("Alignment tensor shape:")
+        print(aln_tensor.shape)
+
         torch.save(
             {"X": aln_tensor, "y": tree_tensor},
             os.path.join(out_dir, f"{identifier}.tensor_pair"),
         )
 
-def process_a_connected_region(dis_mat_file, connected_region_dir: str, aln_dir: str, out_dir: str):
+def process_a_connected_region(dis_mat_file, connected_region_dir: str, partial_lh_dir: str, out_dir: str):
     identifier = dis_mat_file.rstrip(".txt")
     filename = os.path.join(out_dir, f"{identifier}.tensor_pair")
 
@@ -38,7 +44,13 @@ def process_a_connected_region(dis_mat_file, connected_region_dir: str, aln_dir:
     if (not (os.path.isfile(filename) and os.path.getsize(filename) > 0)):
         #pbar.set_description(f"Processing {identifier}")
         tree_tensor, _ = load_connected_region(os.path.join(connected_region_dir, dis_mat_file))
-        aln_tensor, _ = load_alignment(os.path.join(aln_dir, f"{identifier}.fasta"))
+        aln_tensor, _ = load_partial_lhs(os.path.join(partial_lh_dir, f"{identifier}.txt"))
+
+        # Debug
+        #print("Connected_region shape:" )
+        #print(tree_tensor.shape)
+        #print("Partial lhs shape:")
+        #print(aln_tensor.shape)
 
         torch.save(
             {"X": aln_tensor, "y": tree_tensor},
@@ -58,7 +70,7 @@ def make_tensors_from_connected_regions(connected_region_dir: str, aln_dir: str,
 
     pool = Pool(nprocesses)                         # Create a multiprocessing Pool
     with tqdm(total=len(connected_regions)) as pbar:
-        for _iter in pool.imap_unordered(partial(process_a_connected_region, connected_region_dir=connected_region_dir, aln_dir=aln_dir, out_dir=out_dir), connected_regions):
+        for _iter in pool.imap_unordered(partial(process_a_connected_region, connected_region_dir=connected_region_dir, partial_lh_dir=aln_dir, out_dir=out_dir), connected_regions):
             pbar.update()
 
 def main():
