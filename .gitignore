@@ -141,3 +141,5 @@ phyloformer/data/tree
 Seq-Gen-1.3.4
 phyloformer/data/analysis/*.png
 phyloformer/scripts/gadi_*
+phyloformer/scripts/tmp
+phyloformer/data
