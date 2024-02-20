@@ -11,6 +11,10 @@ python3 ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_tensors.py -i ${PHYLOFOR
 # delete traning set 1
 for file in ${PHYLOFORMER_DIR}data/dataset/training/*; do rm "$file"; done 
 
+# count #samples in the normalized training set 1
+echo "#samples in the normalized training set 1: " >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
+ls -ila ${PHYLOFORMER_DIR}data/dataset/normalized_training/*.tensor_pair |wc -l >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
+
 # compress the normalized training set 1
 cd ${PHYLOFORMER_DIR}data/ && tar -czvf tensor_normalized_training_1_${range}.tar.gz dataset/normalized_training/
 
@@ -31,6 +35,10 @@ python3 ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_tensors.py -i ${PHYLOFOR
 # delete traning set 1
 for file in ${PHYLOFORMER_DIR}data/dataset/training/*; do rm "$file"; done 
 
+# count #samples in the normalized training set 1
+echo "#samples in the normalized training set 1: " >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
+ls -ila ${PHYLOFORMER_DIR}data/dataset/normalized_training/*.tensor_pair |wc -l >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
+
 # compress the normalized training set 1
 cd ${PHYLOFORMER_DIR}data/ && tar -czvf tensor_normalized_training_1_${range}.tar.gz dataset/normalized_training/
 
@@ -48,6 +56,10 @@ python3 ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_tensors.py -i ${PHYLOFOR
 
 # delete traning set 1
 for file in ${PHYLOFORMER_DIR}data/dataset/training/*; do rm "$file"; done 
+
+# count #samples in the normalized training set 1
+echo "#samples in the normalized training set 1: " >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
+ls -ila ${PHYLOFORMER_DIR}data/dataset/normalized_training/*.tensor_pair |wc -l >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
 
 # compress the normalized training set 1
 cd ${PHYLOFORMER_DIR}data/ && tar -czvf tensor_normalized_training_1_${range}.tar.gz dataset/normalized_training/
@@ -67,6 +79,10 @@ python3 ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_tensors.py -i ${PHYLOFOR
 # delete traning set 1
 for file in ${PHYLOFORMER_DIR}data/dataset/training/*; do rm "$file"; done 
 
+# count #samples in the normalized training set 1
+echo "#samples in the normalized training set 1: " >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
+ls -ila ${PHYLOFORMER_DIR}data/dataset/normalized_training/*.tensor_pair |wc -l >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
+
 # compress the normalized training set 1
 cd ${PHYLOFORMER_DIR}data/ && tar -czvf tensor_normalized_training_1_${range}.tar.gz dataset/normalized_training/
 
@@ -84,6 +100,10 @@ python3 ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_tensors.py -i ${PHYLOFOR
 
 # delete traning set 1
 for file in ${PHYLOFORMER_DIR}data/dataset/training/*; do rm "$file"; done 
+
+# count #samples in the normalized training set 1
+echo "#samples in the normalized training set 1: " >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
+ls -ila ${PHYLOFORMER_DIR}data/dataset/normalized_training/*.tensor_pair |wc -l >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
 
 # compress the normalized training set 1
 cd ${PHYLOFORMER_DIR}data/ && tar -czvf tensor_normalized_training_1_${range}.tar.gz dataset/normalized_training/
@@ -104,6 +124,10 @@ python3 ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_tensors.py -i ${PHYLOFOR
 # delete traning set 1
 for file in ${PHYLOFORMER_DIR}data/dataset/training/*; do rm "$file"; done 
 
+# count #samples in the normalized training set 1
+echo "#samples in the normalized training set 1: " >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
+ls -ila ${PHYLOFORMER_DIR}data/dataset/normalized_training/*.tensor_pair |wc -l >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
+
 # compress the normalized training set 1
 cd ${PHYLOFORMER_DIR}data/ && tar -czvf tensor_normalized_training_1_${range}.tar.gz dataset/normalized_training/
 
@@ -123,6 +147,10 @@ python3 ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_tensors.py -i ${PHYLOFOR
 
 # delete traning set 1
 for file in ${PHYLOFORMER_DIR}data/dataset/training/*; do rm "$file"; done 
+
+# count #samples in the normalized training set 1
+echo "#samples in the normalized training set 1: " >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
+ls -ila ${PHYLOFORMER_DIR}data/dataset/normalized_training/*.tensor_pair |wc -l >> ${PHYLOFORMER_DIR}scripts/normalize_partial_lhs_training_1_${range}.log
 
 # compress the normalized training set 1
 cd ${PHYLOFORMER_DIR}data/ && tar -czvf tensor_normalized_training_1_${range}.tar.gz dataset/normalized_training/

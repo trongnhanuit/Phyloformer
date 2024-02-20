@@ -28,20 +28,32 @@ def normalize_partial_lhs_one_tensor(tensor_filename: str, input_dir: str, outpu
         for x in range(X):
             for y in range(Y):
                 partial_lh = partial_lhs[x][y]
+
+                # set the printing precision
+                # torch.set_printoptions(precision=100, sci_mode=True)
+
+                # rescale partial lhs before normalizing them to make sure sum of them are not zero due to too-small values
+                max_partial_val = max(partial_lh)
+                partial_lh = partial_lh / max_partial_val
                 total = sum(partial_lh)
 
-                if total <= 0:
-                    print("WARNING: total = " + str(total) + " <= 0. Set all partial lh entries to 1.")
+                if total == 0:
+                    print("WARNING: total == 0. Set all partial lh entries to 1.")
                     for z in range(Z):
                         partial_lhs[x][y][z] = 1
+                elif total < 0:
+                    print("ERROR: total < 0. Set all partial lh entries to 0.")
+                    print(partial_lh)
+                    print(input_filename)
+                    print("x = " + str(x))
+                    print("y = " + str(y))
+                    for z in range(Z):
+                        partial_lhs[x][y][z] = 0
                 else:
                     partial_lhs[x][y] = partial_lh / total
 
         # re-transpose the partial_lhs from [20,200,4] to [4,200,20]
         partial_lhs = torch.transpose(partial_lhs, 0, -1)
-
-        # set the printing precision
-        # torch.set_printoptions(precision=50, sci_mode=True)
 
         # save the tensor to file
         torch.save(
