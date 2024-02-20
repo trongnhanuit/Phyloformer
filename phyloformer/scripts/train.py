@@ -207,6 +207,9 @@ def main():
     if not os.path.exists(args.output):
         os.makedirs(args.output)
 
+    # NHANLT - Debug
+    torch.autograd.set_detect_anomaly(True)
+
     best_model, epoch = training_loop(
         model,
         optimizer,

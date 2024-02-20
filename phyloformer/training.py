@@ -15,6 +15,7 @@ from tqdm import tqdm
 
 from phyloformer.metrics import MAE, MRE
 from phyloformer.phyloformer import AttentionNet
+import math
 
 Scheduler = Union[
     torch.optim.lr_scheduler._LRScheduler, torch.optim.lr_scheduler.ReduceLROnPlateau
@@ -146,6 +147,9 @@ def training_loop(
          - The epoch at which this function returns
     """
 
+    # NHANLT - Debug
+    torch.autograd.set_detect_anomaly(True)
+
     losses_file = None
     if log_file is not None:
         losses_file = open(log_file, "w+")
@@ -179,12 +183,12 @@ def training_loop(
             inputs = x_train.float()
             inputs = inputs.to(device)
 
-            print("x_train size: ", x_train.size(), "; inputs size: ", inputs.size())
-            print("x_train[0] size: ", x_train[0].size(), "; inputs[0] size: ", inputs[0].size())
-            print(x_train[0])
+            #print("x_train size: ", x_train.size(), "; inputs size: ", inputs.size())
+            #print("x_train[0] size: ", x_train[0].size(), "; inputs[0] size: ", inputs[0].size())
+            #print(x_train[0])
 
-            print("inputs")
-            print(inputs[0])
+            #print("inputs")
+            #print(inputs[0])
 
 
             with (autocast() if device == "cuda" and amp else nullcontext()):
@@ -200,6 +204,14 @@ def training_loop(
                 #print("outputs \t ", outputs.get_device())
                 y_train = torch.squeeze(y_train.type_as(outputs))
                 train_loss = criterion(outputs, y_train)
+                if math.isnan(train_loss):
+                    print("train_loss is NaN")
+                    print("inputs")
+                    print(inputs)
+                    print("outputs")
+                    print(outputs)
+                    print("y_train")
+                    print(y_train)
                 if device == "cuda" and amp:
                     scaler.scale(train_loss).backward()
                     if clip_gradients:
