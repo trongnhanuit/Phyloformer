@@ -161,6 +161,7 @@ def main():
     print("Loading model, scheduler and optimizer.")
     if args.load is not None:
         print(f"Loading from checkpoint: {args.load}")
+        print("Device: " + device)
         model, optimizer, scheduler, criterion, _ = load_checkpoint(
             args.load, device=device
         )
@@ -175,11 +176,18 @@ def main():
 
     print("Loading training and validation data.")
     if args.validation is not None:
+        # NHANLT - Debug
+        #train_data = DataLoader(
+        #    TensorDataset(args.input), batch_size=config["batch_size"]
+        #)
+        #val_data = DataLoader(
+        #    TensorDataset(args.validation), batch_size=config["batch_size"]
+        #)
         train_data = DataLoader(
-            TensorDataset(args.input), batch_size=config["batch_size"]
+            TensorDataset(args.input), batch_size=config["batch_size"], shuffle = True
         )
         val_data = DataLoader(
-            TensorDataset(args.validation), batch_size=config["batch_size"]
+            TensorDataset(args.validation), batch_size=config["batch_size"], shuffle = True
         )
     else:
         tensor_files = list(os.listdir(args.input))
@@ -193,11 +201,18 @@ def main():
                 val_ids.append(file)
             else:
                 train_ids.append(file)
+        # NHANLT - Debug
+        # train_data = DataLoader(
+        #    TensorDataset(args.input, filter=train_ids), batch_size=config["batch_size"]
+        # )
+        # val_data = DataLoader(
+        #    TensorDataset(args.input, filter=val_ids), batch_size=config["batch_size"]
+        # )
         train_data = DataLoader(
-            TensorDataset(args.input, filter=train_ids), batch_size=config["batch_size"]
+            TensorDataset(args.input, filter=train_ids), batch_size=config["batch_size"], shuffle = True
         )
         val_data = DataLoader(
-            TensorDataset(args.input, filter=val_ids), batch_size=config["batch_size"]
+            TensorDataset(args.input, filter=val_ids), batch_size=config["batch_size"], shuffle = True
         )
     train_len = len(train_data.dataset.pairs)
     val_len = len(val_data.dataset.pairs)
@@ -217,6 +232,7 @@ def main():
         criterion,
         train_data,
         val_data,
+        amp=config["amp"],
         early_stopping=args.earlystop,
         epochs=config["epochs"],
         config=config,

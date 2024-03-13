@@ -1,6 +1,6 @@
 #!/bin/bash 
-#PBS -l ncpus=24 
-#PBS -l mem=96GB 
+#PBS -l ncpus=48 
+#PBS -l mem=192GB 
 #PBS -l jobfs=200GB 
 #PBS -q normal 
 #PBS -P dx61 
@@ -8,3 +8,4 @@
 #PBS -l storage=scratch/dx61 
 #PBS -l wd 
 source /scratch/dx61/tl8625/Phyloformer/phyloformer/scripts/script_trim_partial_lhs_all.sh > /scratch/dx61/tl8625/Phyloformer/phyloformer/scripts/script_trim_partial_lhs_all.log
+#source /scratch/dx61/tl8625/Phyloformer/phyloformer/scripts/script_trim_partial_lhs_simulated.sh > /scratch/dx61/tl8625/Phyloformer/phyloformer/scripts/script_trim_partial_lhs_simulated.log

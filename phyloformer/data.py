@@ -91,14 +91,14 @@ def load_partial_lhs(path: str) -> Tuple[torch.Tensor, List[str]]:
     -------
     Tuple[torch.Tensor, List[str]]
         a tuple containing:
-         - a tensor representing the input (shape 4 * seq_len * n_leaves)
+         - a tensor representing the input (shape 22 * seq_len * n_leaves)
          - a list of leaves
 
     """
 
     tensor = []
     leaves = []
-    num_states = 4
+    num_states = 22
     partial_lhs = []
     with open(path, newline='') as input_file:
         for line in input_file:
@@ -112,7 +112,7 @@ def load_partial_lhs(path: str) -> Tuple[torch.Tensor, List[str]]:
                 # export partial lhs of the previous leaf (if any) to tensor
                 if len(partial_lhs) > 0:
                     # append the partial lhs to tensor and clear partial lhs
-                    tensor.append(torch.from_numpy(np.array(partial_lhs)).t().view(4, 1, -1))
+                    tensor.append(torch.from_numpy(np.array(partial_lhs)).t().view(22, 1, -1))
 
                     # clear the partial lhs
                     partial_lhs = []
@@ -130,7 +130,7 @@ def load_partial_lhs(path: str) -> Tuple[torch.Tensor, List[str]]:
         # export partial lhs of the last leaf (if any) to tensor
         if len(partial_lhs) > 0:
             # append the partial lhs to tensor and clear partial lhs
-            tensor.append(torch.from_numpy(np.array(partial_lhs)).t().view(4, 1, -1))
+            tensor.append(torch.from_numpy(np.array(partial_lhs)).t().view(22, 1, -1))
 
     return torch.cat(tensor, dim=1).transpose(-1, -2), list(leaves)
 
@@ -194,6 +194,11 @@ def _read_distances_from_file(
             if (len(line) == 0):
                 continue
             values = line.split('\t')
+            if len(values) < 3:
+                print("len(values) < 3")
+                print(path)
+                print(values)
+                exit(1)
             distances[(values[0], values[1])] = float(values[2])
 
     if normalize:
