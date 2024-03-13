@@ -148,7 +148,11 @@ def training_loop(
     """
 
     # NHANLT - Debug
-    torch.autograd.set_detect_anomaly(True)
+    #torch.autograd.set_detect_anomaly(True)
+    if amp:
+        print("With amp")
+    else:
+        print("Without amp")
 
     losses_file = None
     if log_file is not None:
@@ -158,6 +162,8 @@ def training_loop(
 
     if device == "cuda":
         scaler = GradScaler()
+        #scaler = GradScaler(enabled=False)
+        #torch.cuda.amp.autocast(enabled=False)
 
     no_improvement_counter = 0
     best_model = copy.deepcopy(model)
@@ -171,6 +177,15 @@ def training_loop(
     model = model.to(device)
     train_losses, val_losses = [], []
     val_MAEs, val_MREs = [], []
+
+    # NHANLT - DEBUG
+    #MAX_VAL = 1e30
+    #x_min = MAX_VAL
+    #y_min = MAX_VAL
+    #output_min = MAX_VAL
+    #x_max = -MAX_VAL
+    #y_max = -MAX_VAL
+    #output_max = -MAX_VAL
 
     for epoch in tqdm(range(epochs)):
         # TRAINING STEP
@@ -194,7 +209,7 @@ def training_loop(
             with (autocast() if device == "cuda" and amp else nullcontext()):
                 optimizer.zero_grad()
                 outputs, _ = model(inputs)
-                print("Outside: Input size: ", inputs.size(), " on device ", inputs.get_device(), "; Output size: ", outputs.size(), " on device ", outputs.get_device())
+                #print("Outside: Input size: ", inputs.size(), " on device ", inputs.get_device(), "; Output size: ", outputs.size(), " on device ", outputs.get_device())
                 # NHANLT
                 # Debug
                 #print("Data \t Device")
@@ -202,10 +217,52 @@ def training_loop(
                 #print("y_train \t ", y_train.get_device())
                 #print("inputs \t ", inputs.get_device())
                 #print("outputs \t ", outputs.get_device())
+                # NHANLT - Debug
+                if torch.any(inputs.isnan()):
+                    print("inputs is NaN")
+                    print(inputs)
+                    exit(1)
+                if torch.any(outputs.isnan()):
+                    print("outputs is NaN")
+                    print(outputs)
+                    exit(1)
+                if torch.any(y_train.isnan()):
+                    print("y_train is NaN")
+                    print(y_train)
+                    exit(1)
+
+                # NHANLT - Debug
+                #x_min_tmp = torch.min(inputs)
+                #if x_min > x_min_tmp:
+                #    x_min = x_min_tmp
+                #x_max_tmp = torch.max(inputs)
+                #if x_max < x_max_tmp:
+                #    x_max = x_max_tmp
+
+                #y_min_tmp = torch.min(y_train)
+                #if y_min > y_min_tmp:
+                #    y_min = y_min_tmp
+                #y_max_tmp = torch.max(y_train)
+                #if y_max < y_max_tmp:
+                #    y_max = y_max_tmp
+
+                #output_min_tmp = torch.min(outputs)
+                #if output_min > output_min_tmp:
+                #    output_min = output_min_tmp
+                #output_max_tmp = torch.max(outputs)
+                #if output_max < output_max_tmp:
+                #    output_max = output_max_tmp
+
+                # NHANLT - Debug
+                #print("x (min - max): " + str(x_min) + " - " + str(x_max))
+                #print("y (min - max): " + str(y_min) + " - " + str(y_max))
+                #print("output (min - max): " + str(output_min) + " - " + str(output_max))
+
                 y_train = torch.squeeze(y_train.type_as(outputs))
                 train_loss = criterion(outputs, y_train)
-                if math.isnan(train_loss):
+                if torch.any(train_loss.isnan()):
                     print("train_loss is NaN")
+                    print(train_loss)
                     print("inputs")
                     print(inputs)
                     print("outputs")
@@ -213,8 +270,11 @@ def training_loop(
                     print("y_train")
                     print(y_train)
                 if device == "cuda" and amp:
+                    if not torch.any(train_loss.isnan()):
+                        print("train_loss is NOT NaN")
                     scaler.scale(train_loss).backward()
                     if clip_gradients:
+                        print("clip_gradients")
                         scaler.unscale_(optimizer)
                         torch.nn.utils.clip_grad_norm_(
                             model.parameters(), max_norm=2, error_if_nonfinite=False
@@ -242,7 +302,7 @@ def training_loop(
                 inputs = inputs.to(device)
                 with (autocast() if device == "cuda" and amp else nullcontext()):
                     outputs, _ = model(inputs)
-                    print("Validate. inputs size: ", inputs.size(), " on device ", inputs.get_device(), ". outputs size: ", outputs.size(), " on device ", outputs.get_device(), ". y_val size: ", y_val.size(), " on device ", y_val.get_device())
+                    #print("Validate. inputs size: ", inputs.size(), " on device ", inputs.get_device(), ". outputs size: ", outputs.size(), " on device ", outputs.get_device(), ". y_val size: ", y_val.size(), " on device ", y_val.get_device())
                     # NHANLT
                     # Debug
                     # print("Data \t Device")
@@ -390,7 +450,7 @@ def load_checkpoint(
     config = checkpoint["config"]
 
     # Loading model
-    model = AttentionNet(**checkpoint["model"]["architecture"])
+    model = AttentionNet(**checkpoint["model"]["architecture"], device=device)
     model.load_state_dict(checkpoint["model"]["state_dict"], strict=True)
     model.to(device)
 
