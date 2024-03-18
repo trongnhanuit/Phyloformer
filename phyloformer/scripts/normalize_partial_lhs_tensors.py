@@ -25,6 +25,8 @@ def normalize_partial_lhs_one_tensor(tensor_filename: str, input_dir: str, outpu
         partial_lhs = torch.transpose(partial_lhs, 0, -1)
         # new sizes
         X, Y, Z = list(partial_lhs.size())
+        # Threshold for small values
+        SMALL_THRESHOLD = 1e-3
         for x in range(X):
             for y in range(Y):
                 partial_lh = partial_lhs[x][y]
@@ -51,6 +53,27 @@ def normalize_partial_lhs_one_tensor(tensor_filename: str, input_dir: str, outpu
                         partial_lhs[x][y][z] = 0
                 else:
                     partial_lhs[x][y] = partial_lh / total
+
+                    # NHANLT
+                    # avoid very small values after normalization
+                    small_value_found = False
+                    partial_lh = partial_lhs[x][y]
+                    for z in range(Z):
+                        if (partial_lh[z] > 0) and (partial_lh[z] < SMALL_THRESHOLD):
+                            small_value_found = True
+                            #print(partial_lh)
+                            partial_lh[z] = 0
+                    if small_value_found:
+                        total = sum(partial_lh)
+                        #print("Small values found")
+                        #print("- Original values")
+                        #print(partial_lhs[x][y])
+                        #print(partial_lh)
+                        partial_lhs[x][y] = partial_lh / total
+                        #print("- After resetting small values to 0 and re-normalizing them")
+                        #print(partial_lhs[x][y])
+
+
 
         # re-transpose the partial_lhs from [20,200,4] to [4,200,20]
         partial_lhs = torch.transpose(partial_lhs, 0, -1)

@@ -49,29 +49,13 @@ def process_a_tree(row_enum, aln_dir: str, tree_dir: str, dis_mat_dir: str, part
         full_cmd = IQ_TREE_PATH + " -s " + os.path.join(aln_dir, data[1] + ".phy") + " -te " + tree_file_full_path \
                    + fixed_blength + " -redo -m " + data[3] + " -num-con-regs " + str(num_con_regs) \
                    + " -dis-mat " + os.path.join(dis_mat_dir, "tree_" + data[0]) + " -partial-lh " + os.path.join(partial_lh_dir, "tree_" + data[0]) \
-                   + " -nt 1 --kernel-nonrev -seed " + str(seed_num)
+                   + " -skip-gen-con-regions -nt 1 --kernel-nonrev -seed " + str(seed_num)
 
         bash_cmd = (
             f"{full_cmd}"
         )
         process = subprocess.Popen(bash_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, error = process.communicate()
-
-        # validate output -> make sure no negative partial found
-        if process.returncode == 0:
-            partial_lh_file_pref = os.path.join(partial_lh_dir, "tree_" + data[0])
-            for i in range(num_con_regs):
-                partial_lh_file = partial_lh_file_pref + "_" + str(i + 1) + ".txt"
-                if (os.path.isfile(partial_lh_file) and os.path.getsize(partial_lh_file) > 0):
-                    process = subprocess.Popen(f"grep '\t-' {partial_lh_file}", shell=True, stdout=subprocess.PIPE)
-                    output, error = process.communicate()
-                    if len(output) > 0:
-                        print("ERROR: Negative partial lhs")
-                        print(output)
-                        print("partial_lh_file:" + partial_lh_file)
-                        print("IQ-TREE full_cmd:" + full_cmd)
-                else:
-                    print("WARNING: " + partial_lh_file +" not found")
 
         # remove unused IQ-TREE outputs
         try:

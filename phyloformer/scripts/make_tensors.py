@@ -66,7 +66,7 @@ def make_tensors(tree_dir: str, aln_dir: str, out_dir: str, nprocesses):
             pbar.update()
 
 def make_tensors_from_connected_regions(connected_region_dir: str, aln_dir: str, out_dir: str, nprocesses):
-    connected_regions = [file for file in os.listdir(connected_region_dir) if file.endswith(".txt")]
+    connected_regions = [file for file in os.listdir(connected_region_dir) if (file.endswith(".txt") and ".con_reg_" not in file)]
 
     pool = Pool(nprocesses)                         # Create a multiprocessing Pool
     with tqdm(total=len(connected_regions)) as pbar:
