@@ -24,16 +24,16 @@ def evaluate(trues, preds):
     print("#normalized-RFs >= 0.2: ", num_point_two, " (~", "{:.2f}".format(num_point_two / num_total*100), "%)")
     print("#normalized-RFs >= 0.1: ", num_point_one, " (~", "{:.2f}".format(num_point_one / num_total*100), "%)")
 
-    hist, bin_edges = np.histogram(RFs, range=(0,0.1))
-    print("Histogram")
-    print(hist)
+    #hist, bin_edges = np.histogram(RFs, range=(0,0.1))
+    #print("Histogram")
+    #print(hist)
 
     # draw plot
-    plot.bar(np.arange(len(hist)), hist)
-    plot.xticks(np.arange(len(hist)), bin_edges[1:])
-    plot.xlabel("normalized RF")
-    plot.ylabel("Frequency")
-    plot.savefig("normalized_RFs_histogram.png")
+    #plot.bar(np.arange(len(hist)), hist)
+    #plot.xticks(np.arange(len(hist)), bin_edges[1:])
+    #plot.xlabel("normalized RF")
+    #plot.ylabel("Frequency")
+    #plot.savefig("normalized_RFs_histogram.png")
 
     print(f'Mean normalized Robinson-Foulds distance between true and predicted trees: {np.mean(RFs):.3f}')
 

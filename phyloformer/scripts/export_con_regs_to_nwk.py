@@ -94,7 +94,8 @@ def process_a_con_reg(con_reg_filename, input:str, output: str):
         exit(1)
 
     # write the connected region to a file
-    output_filename = os.path.join(output, con_reg_filename.replace(".nwk.con_reg", "").replace(".txt", ".nwk"))
+    #output_filename = os.path.join(output, con_reg_filename.replace(".nwk.con_reg", "").replace(".txt", ".nwk"))
+    output_filename = os.path.join(output, con_reg_filename.replace(".con_reg", "").replace(".txt", ".nwk"))
     with open(output_filename, 'w') as output_file:
         output_file.write(tree.write(format=1))
 

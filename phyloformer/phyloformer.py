@@ -404,7 +404,8 @@ def load_model(path: str, device: str = "cpu", single_gpu: bool = True) -> Atten
 
 def load_state_dict(
     model_path: str,
-    n_blocks: int = 6,
+    #n_blocks: int = 6,
+    n_blocks: int = 2,
     h_dim: int = 64,
     n_heads: int = 4,
     n_seqs: int = 20,

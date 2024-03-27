@@ -7,5 +7,17 @@
 #PBS -l walltime=48:00:00 
 #PBS -l storage=scratch/dx61 
 #PBS -l wd 
-source /scratch/dx61/tl8625/Phyloformer/phyloformer/scripts/script_extract_training_all.sh > /scratch/dx61/tl8625/Phyloformer/phyloformer/scripts/script_extract_training_all.log
-#source /scratch/dx61/tl8625/Phyloformer/phyloformer/scripts/script_extract_training_simulated.sh > /scratch/dx61/tl8625/Phyloformer/phyloformer/scripts/script_extract_training_simulated.log
+
+PHYLOFORMER_DIR="/scratch/dx61/tl8625/Phyloformer/phyloformer/"
+
+# extract the env
+cd /scratch/dx61/tl8625/Phyloformer/ && tar -xzvf env.tar.gz
+
+
+###############################
+num_cpus=48
+dataset="training"
+for part in {1..10}; do 
+	# extract the normalized training set
+	cd ${PHYLOFORMER_DIR}data/ && tar -xzvf tensor_normalized_${dataset}_${part}.tar.gz
+done

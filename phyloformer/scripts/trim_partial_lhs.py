@@ -69,14 +69,20 @@ def process_a_file(in_file_enum, in_dir: str, out_dir: str, length: int, start_s
                         if length > seq_length:
                             print("length > seq_length")
                             exit(1)
-                        for i in range(length):
-                            selected_site = random.randrange(seq_length)
 
-                            # make sure selected_site is not selected yet
-                            while selected_site in selected_site_indexes:
+                        # if length == sequence length -> select all sites
+                        if length == seq_length:
+                            selected_site_indexes = list(range(seq_length))
+                        # otherwise, select random sites
+                        else:
+                            for i in range(length):
                                 selected_site = random.randrange(seq_length)
 
-                            selected_site_indexes.append(selected_site)
+                                # make sure selected_site is not selected yet
+                                while selected_site in selected_site_indexes:
+                                    selected_site = random.randrange(seq_length)
+
+                                selected_site_indexes.append(selected_site)
                     # other lines: either leaf names or partial lhs
                     else:
                         # leaf names

@@ -82,12 +82,12 @@ def simulate_an_aln(aln_id, df, aln_dir: str, tree_dir: str, seed: int):
             # do nothing
             a = 1
 
-def simulate_all_alns(aln_dir: str, tree_dir: str, sim_info_file: str, num_taxa: int, seed: int, nprocesses: int):
+def simulate_all_alns(aln_dir: str, tree_dir: str, sim_info_file: str, tree_set_id: int, seed: int, nprocesses: int):
     # read all simulation info
     df = pd.read_csv(sim_info_file, sep="\t")
 
-    # filter simulations according to num_taxa
-    df = df[df['num_taxa'] == num_taxa]
+    # filter simulations according to tree_set_id
+    df = df[df['tree_set_id'] == tree_set_id]
     ids = list(df['id'])
 
     print("#simulations ", df.id.size)
@@ -123,11 +123,11 @@ def main():
         help="path to the directory containing the trees",
     )
     parser.add_argument(
-        "-num_taxa",
-        "--num_taxa",
+        "-tree_set_id",
+        "--tree_set_id",
         required=True,
         type=int,
-        help="number of taxa",
+        help="the replicate id of the current tree setting",
     )
     parser.add_argument(
         "-seed",
@@ -145,7 +145,7 @@ def main():
         start_seed = int(datetime.now().timestamp())
 
     # simulate alns
-    simulate_all_alns(aln_dir = args.aln_dir, tree_dir = args.tree_dir, sim_info_file = args.sim_info, num_taxa = args.num_taxa, seed = start_seed, nprocesses = args.nprocesses)
+    simulate_all_alns(aln_dir = args.aln_dir, tree_dir = args.tree_dir, sim_info_file = args.sim_info, tree_set_id = args.tree_set_id, seed = start_seed, nprocesses = args.nprocesses)
 
 if __name__ == "__main__":
     main()

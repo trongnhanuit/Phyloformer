@@ -61,7 +61,8 @@ def make_predictions_from_con_regs(model: AttentionNet, testing_dir: str, con_re
         ids = []
         # find the last "_"
         pos = base_name.rfind("_")
-        con_reg_filename = base_name[:pos] + ".nwk.con_reg" + base_name[pos:] + ".txt"
+        #con_reg_filename = base_name[:pos] + ".nwk.con_reg" + base_name[pos:] + ".txt"
+        con_reg_filename = base_name[:pos] + ".con_reg" + base_name[pos:] + ".txt"
         with open(os.path.join(con_regs_dir, con_reg_filename)) as con_reg_file:
             for i, line in enumerate(con_reg_file):
                 # get the second line
@@ -119,10 +120,13 @@ def make_predictions_from_con_regs(model: AttentionNet, testing_dir: str, con_re
                 for j in range(len(ids)):
                     if i < j:
                         predicted_dist[start_index + index] = dm.data[i][j]
+                        index += 1
             # increase count
             count += 1
 
     # NHANLT - Debug
+    # Compute the Pearson correlation coefficient
+    correlation_coefficient = np.corrcoef(predicted_dist, true_dist)[0, 1]
     # draw the scatter plot
     max_dist=max(max(predicted_dist),max(true_dist))
     min_dist = min(min(predicted_dist), min(true_dist))
@@ -132,7 +136,9 @@ def make_predictions_from_con_regs(model: AttentionNet, testing_dir: str, con_re
     ax.set(xlim=(min_dist, max_dist), ylim=(min_dist, max_dist))
     plt.xlabel("True distance")
     plt.ylabel("Predicted distance")
+    plt.title("Pearson correlation coefficient: " + "{:.3f}".format(correlation_coefficient))
     plt.savefig("scatter_predicted_true_distances.png")
+
 
     # count the number of zero predicted distances
     zero_dist_count = 0

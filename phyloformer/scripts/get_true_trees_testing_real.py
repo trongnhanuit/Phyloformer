@@ -95,32 +95,38 @@ def get_the_true_tree(con_reg_filename, tree_dir:str, true_tree_testing: str):
         exit(1)
 
     # write the connected region to a file
-    #output_filename = os.path.join(output, con_reg_filename.replace(".nwk.con_reg", "").replace(".txt", ".nwk"))
+    #output_filename = os.path.join(true_tree_testing, con_reg_filename.replace(".nwk.con_reg", "").replace(".txt", ".nwk"))
     output_filename = os.path.join(true_tree_testing, con_reg_filename.replace(".con_reg", "").replace(".txt", ".nwk"))
     with open(output_filename, 'w') as output_file:
         output_file.write(tree.write(format=1))
-def process_one_testing_sample(testing_sample, tree_dir: str, true_tree_testing: str):
+
+def process_one_testing_sample(testing_sample, tree_dir: str, true_tree_testing: str, testing_dir: str):
     base_name = testing_sample.split('.')[0]
-    #tree_name = base_name + ".nwk"
+    tree_name = base_name + ".nwk"
     # find the last "_"
     pos = base_name.rfind("_")
     #con_reg_filename = base_name[:pos] + ".nwk.con_reg" + base_name[pos:] + ".txt"
-    con_reg_filename = base_name[:pos] + ".con_reg" + base_name[pos:] + ".txt"
+    #con_reg_filename = base_name[:pos] + ".nwk.con_reg" + base_name[pos:] + ".txt"
+    con_reg_new_filename = base_name[:pos] + ".con_reg" + base_name[pos:] + ".txt"
 
     # get the true trees and move the connected regions to the output folder
-    try:
-        get_the_true_tree(con_reg_filename, tree_dir, true_tree_testing)
-        os.rename(os.path.join(tree_dir, con_reg_filename), os.path.join(true_tree_testing, con_reg_filename))
-    except:
+    #try:
+    if os.path.isfile(os.path.join(tree_dir, tree_name)):
+        os.rename(os.path.join(tree_dir, tree_name), os.path.join(true_tree_testing, tree_name))
+    else:
+        get_the_true_tree(con_reg_new_filename, tree_dir, true_tree_testing)
+    os.rename(os.path.join(tree_dir, con_reg_new_filename), os.path.join(true_tree_testing, con_reg_new_filename))
+    #except:
         # do nothing
-        a = 1
+    #    a = 1
+        # os.remove(os.path.join(testing_dir, testing_sample))
 
 def process_all_testing_samples(tree_dir: str, testing: str, true_tree_testing: str, nprocesses):
     testing_samples = [file for file in os.listdir(testing) if file.endswith(".tensor_pair")]
 
     pool = Pool(nprocesses)  # Create a multiprocessing Pool
     with tqdm(total=len(testing_samples)) as pbar:
-        for _iter in pool.imap_unordered(partial(process_one_testing_sample, tree_dir=tree_dir, true_tree_testing=true_tree_testing), testing_samples):
+        for _iter in pool.imap_unordered(partial(process_one_testing_sample, tree_dir=tree_dir, true_tree_testing=true_tree_testing, testing_dir = testing), testing_samples):
             pbar.update()
 
 def main():
