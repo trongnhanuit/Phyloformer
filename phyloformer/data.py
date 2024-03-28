@@ -11,6 +11,7 @@ import torch
 from Bio import SeqIO
 from ete3 import Tree
 from torch.utils.data import Dataset
+import glob
 
 AMINO_ACIDS = np.array(list("ARNDCQEGHILKMFPSTWYVX-"))
 
@@ -36,11 +37,19 @@ class TensorDataset(Dataset):
             A instance of TensorDataset for training phyloformer
         """
         super(TensorDataset, self).__init__()
+        # NHANLT
+        # make sure directory ends with a slash
+        directory = directory.replace("\\", "/")
+        if directory[-1] != '/':
+            directory = directory + "/"
         self.directory = directory
         self.pairs = [
             filepath
-            for filepath in os.listdir(self.directory)
-            if filepath.endswith(".tensor_pair")
+            # NHANLT
+            # recursively get all tensor files
+            #for filepath in os.listdir(self.directory)
+            #if filepath.endswith(".tensor_pair")
+            for filepath in glob.iglob(self.directory + '**/*.tensor_pair', recursive=True)
         ]
         if filter is not None:
             self.pairs = [id for id in self.pairs if id in filter]

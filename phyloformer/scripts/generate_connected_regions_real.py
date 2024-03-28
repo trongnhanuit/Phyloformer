@@ -37,11 +37,12 @@ def process_a_tree(row_enum, aln_dir: str, tree_dir: str, dis_mat_dir: str, part
             tree_file.write(data[4])
 
         # compute the number of connected regions
-        num_con_regs = int((int(data[2]) - 20) * 1.2) + 1
+        num_con_regs = int((int(data[2]) - 20) * 1.5) + 1
 
         # execute IQ-TREE to select connected regions
         fixed_blength = "  -blfix "
         # can't fix the blengths if using +R model
+        data[3] = data[3].replace("\n", "")
         if "+R" in data[3]:
             fixed_blength = ""
 
@@ -81,25 +82,20 @@ def process_a_tree(row_enum, aln_dir: str, tree_dir: str, dis_mat_dir: str, part
         except:
             # do nothing
             a = 1
-def process_all_trees(num_trees: int, in_file: str, aln_dir: str, tree_dir: str, dis_mat_dir: str, partial_lh_dir: str, start_seed, nprocesses):
+def process_all_trees(start: int, end: int, in_file: str, aln_dir: str, tree_dir: str, dis_mat_dir: str, partial_lh_dir: str, start_seed, nprocesses):
     df = pd.read_csv(in_file, sep='\t')
 
     # get all rows from the dataframe
     rows = []
     for index, row in df.iterrows():
-        rows.append(str(row['TREE_KEY']) + "\t" + row['ALI_ID'] + "\t" + str(row['ACT_NUM_TAXA']) + "\t" + row['MODEL'] + "\t" + row['NEWICK_STRING'])
-
-    # select a certain number of trees
-    random.seed(start_seed)
-    # Subsample without replacement
-    if num_trees > len(rows):
-        raise ValueError("Subsample size cannot be greater than the array size")
-
-    selected_rows = random.sample(rows, num_trees)
+        if (start == -1 or index >= start) and (end == -1 or index < end):
+            rows.append(str(row['TREE_KEY']) + "\t" + row['ALI_ID'] + "\t" + str(row['ACT_NUM_TAXA']) + "\t" + row['MODEL'] + "\t" + row['NEWICK_STRING'])
+        if (end != -1 and index >= end):
+            break
 
     pool = Pool(nprocesses)                         # Create a multiprocessing Pool
-    with tqdm(total=len(selected_rows)) as pbar:
-        for _iter in pool.imap_unordered(partial(process_a_tree, aln_dir = aln_dir, tree_dir = tree_dir, dis_mat_dir = dis_mat_dir, partial_lh_dir = partial_lh_dir, start_seed = start_seed), enumerate(selected_rows)):
+    with tqdm(total=len(rows)) as pbar:
+        for _iter in pool.imap_unordered(partial(process_a_tree, aln_dir = aln_dir, tree_dir = tree_dir, dis_mat_dir = dis_mat_dir, partial_lh_dir = partial_lh_dir, start_seed = start_seed), enumerate(rows)):
             pbar.update()
 
 def main():
@@ -149,11 +145,18 @@ def main():
         help="random seed number",
     )
     parser.add_argument(
-        "-num_trees",
-        "--num_trees",
+        "-start",
+        "--start",
         type=int,
-        default=30,
-        help="Number of trees (to select)",
+        default=-1,
+        help="The line index to start",
+    )
+    parser.add_argument(
+        "-end",
+        "--end",
+        type=int,
+        default=-1,
+        help="The end line index",
     )
     parser.add_argument('-p', '--nprocesses', type=int, required=False, help='number of processes (default:1)', default=1)
     args = parser.parse_args()
@@ -164,7 +167,7 @@ def main():
         start_seed = int(datetime.now().timestamp())
 
     # process all trees
-    process_all_trees(args.num_trees, args.input, args.aln_dir, args.tree_dir, args.dis_mat_dir, args.partial_lh_dir, start_seed, args.nprocesses)
+    process_all_trees(args.start, args.end, args.input, args.aln_dir, args.tree_dir, args.dis_mat_dir, args.partial_lh_dir, start_seed, args.nprocesses)
 
 if __name__ == "__main__":
     main()
