@@ -80,6 +80,9 @@ def process_an_aln(aln_id, df, aln_dir: str, tree_dir: str, dis_mat_dir: str, pa
                     print("IQ-TREE full_cmd:" + full_cmd)
             else:
                 print("WARNING: " + partial_lh_file +" not found")
+    else:
+        # print(output)
+        print(error)
 
     # remove unused IQ-TREE outputs
     try:

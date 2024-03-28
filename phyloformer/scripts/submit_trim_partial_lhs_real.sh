@@ -18,6 +18,8 @@ num_cpus=48
 num_sites=200
 
 for part in {1..10}; do 
+	# extract the full-length partial lhs
+	cd ${PHYLOFORMER_DIR}${DATA_DIR} && tar -xzvf partial_lh_full_${part}.tar.gz
 
 	python3 ${PHYLOFORMER_DIR}${SCRIPTS_DIR}trim_partial_lhs.py -i ${PHYLOFORMER_DIR}${DATA_DIR}partial_lhs/full_length/ -o  ${PHYLOFORMER_DIR}${DATA_DIR}partial_lhs/trimmed/ -l ${num_sites} -seed ${part} -p $num_cpus &> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}trim_partial_lhs${DATA_TYPE}_${part}.log
 

@@ -20,8 +20,8 @@ path_root = Path(__file__).parents[2]
 sys.path.append(str(path_root))
 
 #IQ_TREE_PATH ="/project/AliSim/iq-tree-dl/Phyloformer/phyloformer/scripts/iqtree2"
-IQ_TREE_PATH ="/scratch/dx61/tl8625/Phyloformer/phyloformer/scripts/iqtree2"
-def process_a_tree(row_enum, aln_dir: str, tree_dir: str, dis_mat_dir: str, partial_lh_dir: str, start_seed):
+#IQ_TREE_PATH ="/scratch/dx61/tl8625/Phyloformer/phyloformer/scripts/iqtree2"
+def process_a_tree(row_enum, aln_dir: str, tree_dir: str, dis_mat_dir: str, partial_lh_dir: str, iqtree_path: str, start_seed):
     # set random seed num
     file_index, row = row_enum
     seed_num = start_seed + file_index
@@ -46,8 +46,8 @@ def process_a_tree(row_enum, aln_dir: str, tree_dir: str, dis_mat_dir: str, part
         if "+R" in data[3]:
             fixed_blength = ""
 
-        global IQ_TREE_PATH
-        full_cmd = IQ_TREE_PATH + " -s " + os.path.join(aln_dir, data[1] + ".phy") + " -te " + tree_file_full_path \
+        #global IQ_TREE_PATH
+        full_cmd = iqtree_path + " -s " + os.path.join(aln_dir, data[1] + ".phy") + " -te " + tree_file_full_path \
                    + fixed_blength + " -redo -m " + data[3] + " -num-con-regs " + str(num_con_regs) \
                    + " -dis-mat " + os.path.join(dis_mat_dir, "tree_" + data[0]) + " -partial-lh " + os.path.join(partial_lh_dir, "tree_" + data[0]) \
                    + " -con-regions-pref " + os.path.join(tree_dir, "tree_" + data[0]) \
@@ -74,6 +74,9 @@ def process_a_tree(row_enum, aln_dir: str, tree_dir: str, dis_mat_dir: str, part
                         print("IQ-TREE full_cmd:" + full_cmd)
                 else:
                     print("WARNING: " + partial_lh_file +" not found")
+        else:
+            #print(output)
+            print(error)
 
         # remove unused IQ-TREE outputs
         try:
@@ -82,7 +85,7 @@ def process_a_tree(row_enum, aln_dir: str, tree_dir: str, dis_mat_dir: str, part
         except:
             # do nothing
             a = 1
-def process_all_trees(start: int, end: int, in_file: str, aln_dir: str, tree_dir: str, dis_mat_dir: str, partial_lh_dir: str, start_seed, nprocesses):
+def process_all_trees(start: int, end: int, in_file: str, aln_dir: str, tree_dir: str, dis_mat_dir: str, partial_lh_dir: str, iqtree_path: str, start_seed, nprocesses):
     df = pd.read_csv(in_file, sep='\t')
 
     # get all rows from the dataframe
@@ -95,7 +98,7 @@ def process_all_trees(start: int, end: int, in_file: str, aln_dir: str, tree_dir
 
     pool = Pool(nprocesses)                         # Create a multiprocessing Pool
     with tqdm(total=len(rows)) as pbar:
-        for _iter in pool.imap_unordered(partial(process_a_tree, aln_dir = aln_dir, tree_dir = tree_dir, dis_mat_dir = dis_mat_dir, partial_lh_dir = partial_lh_dir, start_seed = start_seed), enumerate(rows)):
+        for _iter in pool.imap_unordered(partial(process_a_tree, aln_dir = aln_dir, tree_dir = tree_dir, dis_mat_dir = dis_mat_dir, partial_lh_dir = partial_lh_dir, iqtree_path=iqtree_path, start_seed = start_seed), enumerate(rows)):
             pbar.update()
 
 def main():
@@ -138,6 +141,14 @@ def main():
         help="path to the directory which will be used to output the partial lhs at leaves of connected regions",
     )
     parser.add_argument(
+        "-iqtree",
+        "--iqtree",
+        required=False,
+        type=str,
+        default="/scratch/dx61/tl8625/Phyloformer/phyloformer/scripts/iqtree2",
+        help="path to iqtree2",
+    )
+    parser.add_argument(
         "-seed",
         "--seed",
         type=int,
@@ -167,7 +178,7 @@ def main():
         start_seed = int(datetime.now().timestamp())
 
     # process all trees
-    process_all_trees(args.start, args.end, args.input, args.aln_dir, args.tree_dir, args.dis_mat_dir, args.partial_lh_dir, start_seed, args.nprocesses)
+    process_all_trees(args.start, args.end, args.input, args.aln_dir, args.tree_dir, args.dis_mat_dir, args.partial_lh_dir, args.iqtree, start_seed, args.nprocesses)
 
 if __name__ == "__main__":
     main()

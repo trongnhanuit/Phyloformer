@@ -8,7 +8,7 @@
 #PBS -l storage=scratch/dv19 
 #PBS -l wd 
 
-PHYLOFORMER_DIR="/scratch/dx61/tl8625/Phyloformer2/phyloformer/"
+PHYLOFORMER_DIR="/scratch/dx61/tl8625/Phyloformer3/phyloformer/"
 SCRIPTS_DIR="scripts/"
 DATA_DIR="data/aa/"
 DATA_TYPE="_real"
@@ -24,8 +24,8 @@ for part in {7..8}; do
 
 	# generate connected regions
 	start_id=$(((part-1) * 220))
-	end_id=$((end_id + 220))
-	python3 ${PHYLOFORMER_DIR}${SCRIPTS_DIR}generate_connected_regions_real.py -i ${PHYLOFORMER_DIR}${DATA_DIR}aa_tree_model_wrt_aln_id_200sites_1.csv -aln ${PHYLOFORMER_DIR}${DATA_DIR}aln/ -tree ${PHYLOFORMER_DIR}${DATA_DIR}tree/ -dis_mat_dir ${PHYLOFORMER_DIR}${DATA_DIR}dis_mat/ -partial_lh_dir ${PHYLOFORMER_DIR}${DATA_DIR}partial_lhs/full_length/ -seed ${part} -p $num_cpus -start ${start_id} -end ${end_id} &> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}script_generate_connected_regions${DATA_TYPE}_${part}.log
+	end_id=$((start_id + 220))
+	python3 ${PHYLOFORMER_DIR}${SCRIPTS_DIR}generate_connected_regions_real.py -i ${PHYLOFORMER_DIR}${DATA_DIR}aa_tree_model_wrt_aln_id_200sites_1.csv -aln ${PHYLOFORMER_DIR}${DATA_DIR}aln/ -tree ${PHYLOFORMER_DIR}${DATA_DIR}tree/ -dis_mat_dir ${PHYLOFORMER_DIR}${DATA_DIR}dis_mat/ -partial_lh_dir ${PHYLOFORMER_DIR}${DATA_DIR}partial_lhs/full_length/ -iqtree ${PHYLOFORMER_DIR}${SCRIPTS_DIR}iqtree2 -seed ${part} -p $num_cpus -start ${start_id} -end ${end_id} &> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}script_generate_connected_regions${DATA_TYPE}_${part}.log
 
 	# count #connected regions
 	echo "#Connected regions in dis_mat directory: " >> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}script_generate_connected_regions${DATA_TYPE}_${part}.log
