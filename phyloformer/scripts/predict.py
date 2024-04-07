@@ -43,7 +43,7 @@ def make_predictions(model: AttentionNet, aln_dir: str, out_dir: str, save_dm: b
 def make_predictions_from_con_regs(model: AttentionNet, testing_dir: str, con_regs_dir:str, out_dir: str, save_dm: bool):
     # NHANLT - Debug
     # number of samples for comparison
-    num_samples = 100
+    num_samples = 1000
     true_dist = [0] * (num_samples * 190)
     predicted_dist = [0] * (num_samples * 190)
     count = 0
@@ -125,8 +125,10 @@ def make_predictions_from_con_regs(model: AttentionNet, testing_dir: str, con_re
             count += 1
 
     # NHANLT - Debug
+    # compute the slope
+    slope = np.polyfit(true_dist, predicted_dist, 1)[0]
     # Compute the Pearson correlation coefficient
-    correlation_coefficient = np.corrcoef(predicted_dist, true_dist)[0, 1]
+    correlation_coefficient = np.corrcoef(true_dist, predicted_dist)[0, 1]
     # draw the scatter plot
     max_dist=max(max(predicted_dist),max(true_dist))
     min_dist = min(min(predicted_dist), min(true_dist))
@@ -136,7 +138,7 @@ def make_predictions_from_con_regs(model: AttentionNet, testing_dir: str, con_re
     ax.set(xlim=(min_dist, max_dist), ylim=(min_dist, max_dist))
     plt.xlabel("True distance")
     plt.ylabel("Predicted distance")
-    plt.title("Pearson correlation coefficient: " + "{:.3f}".format(correlation_coefficient))
+    plt.title("Pearson corr-coeff: " + "{:.3f}".format(correlation_coefficient) + "\n Slope: " + "{:.3f}".format(slope))
     plt.savefig("scatter_predicted_true_distances.png")
 
 
