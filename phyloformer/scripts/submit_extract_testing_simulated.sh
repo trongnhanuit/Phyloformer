@@ -59,11 +59,13 @@ mv ${PHYLOFORMER_DIR}${DATA_DIR}dataset/${dataset}/*.tensor_pair ${PHYLOFORMER_D
 # extract all original trees
 for part in {1..10}; do 
 	cd ${PHYLOFORMER_DIR}${DATA_DIR} && tar -xzvf tree_${part}.tar.gz
+	
+	# generate the true trees
+	python3 ${PHYLOFORMER_DIR}${SCRIPTS_DIR}get_true_trees_testing.py -tree_dir ${PHYLOFORMER_DIR}${DATA_DIR}tree -testing ${PHYLOFORMER_DIR}${DATA_DIR}dataset/normalized_${dataset}/ -true_tree_testing ${PHYLOFORMER_DIR}${DATA_DIR}true_tree_testing -p $num_cpus &> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}get_true_trees_testing${DATA_TYPE}.log
+
+	# remove original trees
+	for file in ${FULL_DATA_DIR}tree/*; do rm "$file"; done
 done
-	
-	
-# generate the true trees
-python3 ${PHYLOFORMER_DIR}${SCRIPTS_DIR}get_true_trees_testing.py -tree_dir ${PHYLOFORMER_DIR}${DATA_DIR}tree -testing ${PHYLOFORMER_DIR}${DATA_DIR}dataset/normalized_${dataset}/ -true_tree_testing ${PHYLOFORMER_DIR}${DATA_DIR}true_tree_testing -p $num_cpus &> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}get_true_trees_testing${DATA_TYPE}.log
 
 # count #trees in true_tree_testing
 echo "#trees in true_tree_testing: " >> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}get_true_trees_testing${DATA_TYPE}.log
@@ -79,8 +81,7 @@ cd ${PHYLOFORMER_DIR}${DATA_DIR} && tar -czvf tensor_normalized_${dataset}_1K.ta
 # compress the true_tree_testing
 cd ${PHYLOFORMER_DIR}${DATA_DIR} && tar -czvf true_trees_${dataset}_1K.tar.gz ${PHYLOFORMER_DIR}${DATA_DIR}true_tree_testing/
 
-# remove original trees
-for file in ${FULL_DATA_DIR}tree/*; do rm "$file"; done
+
 
 
 

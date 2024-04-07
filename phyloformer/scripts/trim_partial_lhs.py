@@ -68,7 +68,7 @@ def process_a_file(in_file_enum, in_dir: str, out_dir: str, length: int, start_s
                         # randomly select unique sites
                         if length > seq_length:
                             print("length > seq_length")
-                            exit(1)
+                            exit(0)
 
                         # if length == sequence length -> select all sites
                         if length == seq_length:

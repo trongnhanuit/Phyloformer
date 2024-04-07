@@ -16,12 +16,11 @@ DATA_TYPE="_real"
 ###############################
 num_cpus=48
 num_sites=200
-THRESHOLD=26213 # MAX * 0.8 where MAX = 32767
-THRESHOLD_68=22282 # MAX * 0.68 where MAX = 32767
+THRESHOLD=29490 # MAX * 0.9 where MAX = 32767
+THRESHOLD_100=32767 # MAX * 100% where MAX = 32767
 
 
 ###############################
-num_cpus=48
 for part in {1..10}; do 
 	
 	# extract the trimmed partial lhs
@@ -47,12 +46,12 @@ for part in {1..10}; do
   		if [ -f "$file" ]; then
       		if [ $RANDOM -lt $THRESHOLD ]; then
       			# split training into two sets
-      			if [ $RANDOM -le ${THRESHOLD_68} ] && [ ${count_training_samples} -lt ${max_training_samples} ]; then
-      				count_training_samples=$((count_training_samples+1)) 
-      				mv $file ${PHYLOFORMER_DIR}${DATA_DIR}dataset/training/
-      			else
-      				mv $file ${PHYLOFORMER_DIR}${DATA_DIR}dataset/training_2/
-      			fi
+      			#if [ $RANDOM -le ${THRESHOLD_68} ] && [ ${count_training_samples} -lt ${max_training_samples} ]; then
+      			#	count_training_samples=$((count_training_samples+1)) 
+      			mv $file ${PHYLOFORMER_DIR}${DATA_DIR}dataset/training/
+      			#else
+      			#	mv $file ${PHYLOFORMER_DIR}${DATA_DIR}dataset/training_2/
+      			#fi
       		else
       			mv $file ${PHYLOFORMER_DIR}${DATA_DIR}dataset/testing/
       		fi
@@ -62,18 +61,18 @@ for part in {1..10}; do
 	# count #samples in training and testing sets
 	echo "#Samples in Training set 1: " >> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}make_split_tensor${DATA_TYPE}_${part}.log
 	ls -ila ${PHYLOFORMER_DIR}${DATA_DIR}dataset/training/*.tensor_pair |wc -l >> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}make_split_tensor${DATA_TYPE}_${part}.log
-	echo "#Samples in Training set 2: " >> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}make_split_tensor${DATA_TYPE}_${part}.log
-	ls -ila ${PHYLOFORMER_DIR}${DATA_DIR}dataset/training_2/*.tensor_pair |wc -l >> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}make_split_tensor${DATA_TYPE}_${part}.log
+	#echo "#Samples in Training set 2: " >> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}make_split_tensor${DATA_TYPE}_${part}.log
+	#ls -ila ${PHYLOFORMER_DIR}${DATA_DIR}dataset/training_2/*.tensor_pair |wc -l >> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}make_split_tensor${DATA_TYPE}_${part}.log
 	echo "#Samples in Testing set: " >> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}make_split_tensor${DATA_TYPE}_${part}.log
 	ls -ila ${PHYLOFORMER_DIR}${DATA_DIR}dataset/testing/*.tensor_pair |wc -l >> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}make_split_tensor${DATA_TYPE}_${part}.log
 	
 	# compress training set
 	cd ${PHYLOFORMER_DIR}${DATA_DIR} && tar -czvf tensor_training_${part}.tar.gz dataset/training/
-	cd ${PHYLOFORMER_DIR}${DATA_DIR} && tar -czvf tensor_training_2_${part}.tar.gz dataset/training_2/
+	#cd ${PHYLOFORMER_DIR}${DATA_DIR} && tar -czvf tensor_training_2_${part}.tar.gz dataset/training_2/
 	
 	# delete training set
 	for file in ${PHYLOFORMER_DIR}${DATA_DIR}dataset/training/*; do rm "$file"; done 
-	for file in ${PHYLOFORMER_DIR}${DATA_DIR}dataset/training_2/*; do rm "$file"; done 
+	#for file in ${PHYLOFORMER_DIR}${DATA_DIR}dataset/training_2/*; do rm "$file"; done 
 	
 	# compress testing set
 	cd ${PHYLOFORMER_DIR}${DATA_DIR} && tar -czvf tensor_testing_${part}.tar.gz dataset/testing/

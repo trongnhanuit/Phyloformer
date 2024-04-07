@@ -21,7 +21,7 @@ sys.path.append(str(path_root))
 
 #IQ_TREE_PATH ="/project/AliSim/iq-tree-dl/Phyloformer/phyloformer/scripts/iqtree2"
 #IQ_TREE_PATH ="/scratch/dx61/tl8625/Phyloformer/phyloformer/scripts/iqtree2"
-def process_a_tree(row_enum, aln_dir: str, tree_dir: str, dis_mat_dir: str, partial_lh_dir: str, iqtree_path: str, start_seed):
+def process_a_tree(row_enum, aln_dir: str, tree_dir: str, dis_mat_dir: str, partial_lh_dir: str, iqtree_path: str, sel_factor: float, start_seed):
     # set random seed num
     file_index, row = row_enum
     seed_num = start_seed + file_index
@@ -37,7 +37,7 @@ def process_a_tree(row_enum, aln_dir: str, tree_dir: str, dis_mat_dir: str, part
             tree_file.write(data[4])
 
         # compute the number of connected regions
-        num_con_regs = int((int(data[2]) - 20) * 1.5) + 1
+        num_con_regs = int((int(data[2]) - 20) * sel_factor) + 1
 
         # execute IQ-TREE to select connected regions
         fixed_blength = "  -blfix "
@@ -85,7 +85,7 @@ def process_a_tree(row_enum, aln_dir: str, tree_dir: str, dis_mat_dir: str, part
         except:
             # do nothing
             a = 1
-def process_all_trees(start: int, end: int, in_file: str, aln_dir: str, tree_dir: str, dis_mat_dir: str, partial_lh_dir: str, iqtree_path: str, start_seed, nprocesses):
+def process_all_trees(start: int, end: int, in_file: str, aln_dir: str, tree_dir: str, dis_mat_dir: str, partial_lh_dir: str, iqtree_path: str, sel_factor: float, start_seed, nprocesses):
     df = pd.read_csv(in_file, sep='\t')
 
     # get all rows from the dataframe
@@ -98,7 +98,7 @@ def process_all_trees(start: int, end: int, in_file: str, aln_dir: str, tree_dir
 
     pool = Pool(nprocesses)                         # Create a multiprocessing Pool
     with tqdm(total=len(rows)) as pbar:
-        for _iter in pool.imap_unordered(partial(process_a_tree, aln_dir = aln_dir, tree_dir = tree_dir, dis_mat_dir = dis_mat_dir, partial_lh_dir = partial_lh_dir, iqtree_path=iqtree_path, start_seed = start_seed), enumerate(rows)):
+        for _iter in pool.imap_unordered(partial(process_a_tree, aln_dir = aln_dir, tree_dir = tree_dir, dis_mat_dir = dis_mat_dir, partial_lh_dir = partial_lh_dir, iqtree_path=iqtree_path, sel_factor = sel_factor, start_seed = start_seed), enumerate(rows)):
             pbar.update()
 
 def main():
@@ -149,6 +149,13 @@ def main():
         help="path to iqtree2",
     )
     parser.add_argument(
+        "-sel_factor",
+        "--sel_factor",
+        type=float,
+        default=1.5,
+        help="selection factor",
+    )
+    parser.add_argument(
         "-seed",
         "--seed",
         type=int,
@@ -178,7 +185,7 @@ def main():
         start_seed = int(datetime.now().timestamp())
 
     # process all trees
-    process_all_trees(args.start, args.end, args.input, args.aln_dir, args.tree_dir, args.dis_mat_dir, args.partial_lh_dir, args.iqtree, start_seed, args.nprocesses)
+    process_all_trees(args.start, args.end, args.input, args.aln_dir, args.tree_dir, args.dis_mat_dir, args.partial_lh_dir, args.iqtree, args.sel_factor, start_seed, args.nprocesses)
 
 if __name__ == "__main__":
     main()
