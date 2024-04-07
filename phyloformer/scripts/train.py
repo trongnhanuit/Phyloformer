@@ -6,6 +6,7 @@ from datetime import datetime
 from pprint import pprint
 from time import time
 from typing import Optional
+import glob
 
 import torch
 from torch.utils.data import DataLoader
@@ -190,7 +191,16 @@ def main():
             TensorDataset(args.validation), batch_size=config["batch_size"], shuffle = True
         )
     else:
-        tensor_files = list(os.listdir(args.input))
+        # NHANLT - Debug
+        #tensor_files = list(os.listdir(args.input))
+        directory = args.input.replace("\\", "/")
+        if directory[-1] != '/':
+            directory = directory + "/"
+        tensor_files = list([
+            filepath
+            for filepath in glob.iglob(directory + '**/*.tensor_pair', recursive=True)
+        ])
+
         n_tensors = int(len(tensor_files) * 0.1)
         sampled_indices = set(
             random.Random(seed).sample(range(len(tensor_files)), n_tensors)

@@ -58,7 +58,9 @@ class TensorDataset(Dataset):
         return len(self.pairs)
 
     def __getitem__(self, index: int):
-        pair = torch.load(os.path.join(self.directory, (self.pairs[index])))
+        # NHANLT - Debug
+        #pair = torch.load(os.path.join(self.directory, (self.pairs[index])))
+        pair = torch.load(self.pairs[index])
         return pair["X"], pair["y"]
 
 
