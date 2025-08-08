@@ -110,6 +110,16 @@ def choose_data(
 
     return train_pairs, val_pairs
 
+def load_train_val(train_dir, val_dir):
+    train_files = listdir_paths(train_dir)
+    val_files = listdir_paths(val_dir)
+
+    # Shuffle data
+    random.shuffle(train_files)
+    random.shuffle(val_files)
+
+    return train_files, val_files
+
 
 class LightningAxialTransformer(lightning.LightningModule):
     """Lighnint Object for Phyloformer training"""
@@ -211,29 +221,35 @@ if __name__ == "__main__":
 
     # DATA
     data_grp = parser.add_argument_group("data", description="Data IO parameters")
+    #data_grp.add_argument(
+    #    "--train-trees", "-t", required=True, help="Directory with training trees"
+    #)
+    #data_grp.add_argument(
+    #    "--train-alignments",
+    #    "-a",
+    #    required=True,
+    #    help="Directory with training alignments",
+    #)
+    #data_grp.add_argument(
+    #    "--val-trees", "-T", required=False, help="Directory with validation trees"
+    #)
+    #data_grp.add_argument(
+    #    "--val-alignments",
+    #    "-A",
+    #    required=False,
+    #    help="Directory with validation alignments",
+    #)
+    #data_grp.add_argument(
+    #    "--train-regex", "-r", default=None, help="Regex to filter training examples"
+    #)
+    #data_grp.add_argument(
+    #    "--val-regex", "-R", default=None, help="Regex to filter validation examples"
+    #)
     data_grp.add_argument(
-        "--train-trees", "-t", required=True, help="Directory with training trees"
+        "--traning_set", "-train_dts", required=True, help="Directory with all training tensor samples"
     )
     data_grp.add_argument(
-        "--train-alignments",
-        "-a",
-        required=True,
-        help="Directory with training alignments",
-    )
-    data_grp.add_argument(
-        "--val-trees", "-T", required=False, help="Directory with validation trees"
-    )
-    data_grp.add_argument(
-        "--val-alignments",
-        "-A",
-        required=False,
-        help="Directory with validation alignments",
-    )
-    data_grp.add_argument(
-        "--train-regex", "-r", default=None, help="Regex to filter training examples"
-    )
-    data_grp.add_argument(
-        "--val-regex", "-R", default=None, help="Regex to filter validation examples"
+        "--val_set", "-val_dts", required=True, help="Directory with all validation tensor samples"
     )
 
     # STARTING POINT
@@ -357,6 +373,13 @@ if __name__ == "__main__":
     utils_grp.add_argument(
         "--profile", action="store_true", help="Run profiler for a few steps and exit"
     )
+    utils_grp.add_argument(
+        "--num_cpus",
+        "-ncpus",
+        default=1,
+        type=int,
+        help="Number of CPUs",
+    )
 
     args = parser.parse_args()
 
@@ -374,6 +397,14 @@ if __name__ == "__main__":
     LOGGING_STEPS = args.log_every
 
     N_CPUS = int(os.environ.get("SLURM_CPUS_PER_TASK", cpu_count()))
+
+    # NHANLT - allow users to specify the number of CPUs
+    num_cpus = args.num_cpus
+    if num_cpus > N_CPUS:
+        print(f'You specified {num_cpus} CPUs, but only {N_CPUS} CPUs are available')
+        exit(1)
+    N_CPUS = num_cpus
+
     NUM_WORKERS = N_CPUS // 2
 
     global WORKERS_TRAIN
@@ -399,14 +430,16 @@ if __name__ == "__main__":
     wp = args.warmup_steps
     dr = args.dropout
 
-    train_pairs, val_pairs = choose_data(
-        args.train_alignments,
-        args.train_trees,
-        args.train_regex,
-        args.val_alignments,
-        args.val_trees,
-        args.val_regex,
-    )
+    #train_pairs, val_pairs = choose_data(
+    #    args.train_alignments,
+    #    args.train_trees,
+    #    args.train_regex,
+    #    args.val_alignments,
+    #    args.val_trees,
+    #    args.val_regex,
+    #)
+
+    train_pairs, val_pairs = load_train_val(args.traning_set, args.val_set)
 
     # Check if we are on SLURM and grab env variables
     slurm_args = dict()
