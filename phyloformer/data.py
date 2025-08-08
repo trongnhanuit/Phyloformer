@@ -30,9 +30,9 @@ def load_alignment(filepath):
     seqs = torch.nn.functional.one_hot(seqs, num_classes=len(ALPHABET)).permute(2, 1, 0)
 
     # NhanLT: debug
-    print(" - seqs ")
-    print("Data type:", seqs.dtype)
-    print("Shape:", seqs.shape)
+    #print(" - seqs ")
+    #print("Data type:", seqs.dtype)
+    #print("Shape:", seqs.shape)
 
     return seqs, ids
 
@@ -92,9 +92,9 @@ def load_partial_lhs(filepath: str):
     returned_tensor = torch.cat(tensor, dim=1).transpose(-1, -2)
 
     # NhanLT: debug
-    print(" - returned_tensor ")
-    print("Data type:", returned_tensor.dtype)
-    print("Shape:", returned_tensor.shape)
+    #print(" - returned_tensor ")
+    #print("Data type:", returned_tensor.dtype)
+    #print("Shape:", returned_tensor.shape)
 
     return returned_tensor, list(leaves)
 
@@ -118,8 +118,8 @@ def load_distance_matrix(filepath, ids):
         distances.append(dm.distance(l1, l2))
 
         # NhanLT: debug
-    print(" - distances ")
-    print("Length:", len(distances))
+    #print(" - distances ")
+    #print("Length:", len(distances))
 
     return torch.tensor(distances)
 
@@ -180,8 +180,8 @@ def read_distances_from_file(
             print(f'key ({tip1},{tip2}) in {path}')
             exit(1)
 
-    print(" - distances_list ")
-    print("Length:", len(distances_list))
+    #print(" - distances_list ")
+    #print("Length:", len(distances_list))
 
     return torch.tensor(distances_list)
 
@@ -201,8 +201,10 @@ class PhyloDataset(Dataset):
         return len(self.pairs)
 
     def __getitem__(self, index):
-        treefile, alnfile = self.pairs[index]
-        x, ids = load_alignment(alnfile)
-        y = load_distance_matrix(treefile, ids)
+        #treefile, alnfile = self.pairs[index]
+        #x, ids = load_alignment(alnfile)
+        #y = load_distance_matrix(treefile, ids)
+        #return x, y
 
-        return x, y
+        pair = torch.load(self.pairs[index])
+        return pair["X"], pair["y"]

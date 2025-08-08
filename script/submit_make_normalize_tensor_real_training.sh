@@ -12,6 +12,9 @@ MODE="training"
 PHYLOFORMER_DIR="/scratch/dx61/tl8625/phyloformer/Phyloformer/"
 SCRIPTS_DIR="script/"
 DATA_DIR="data/"${MODE}"/"
+DATA_DTS_DIR=${DATA_DIR}"dataset/"
+VAL_DIR="data/validation/"
+VAL_DTS_DIR=${VAL_DIR}"dataset/"
 
 ###############################
 num_cpus=48
@@ -21,6 +24,8 @@ mkdir -p ${PHYLOFORMER_DIR}${DATA_DIR}dataset
 
 
 ###############################
+cd ${PHYLOFORMER_DIR} && python3 -m venv env && source env/bin/activate
+
 for part in {1..10}; do 
 	
 	# delete old files
@@ -35,7 +40,7 @@ for part in {1..10}; do
 	cd ${PHYLOFORMER_DIR}${DATA_DIR} && tar -xzvf ${MODE}_dis_mat_${part}.tar.gz
 	
 	# make tensors
-	python3 ${PHYLOFORMER_DIR}${SCRIPTS_DIR}make_tensors.py -dm ${PHYLOFORMER_DIR}${DATA_DIR}dis_mat/ -asr ${PHYLOFORMER_DIR}${DATA_DIR}partial_lhs/trimmed/ -o ${PHYLOFORMER_DIR}${DATA_DIR}dataset/ -p ${num_cpus} &> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}log_make_tensor_${MODE}_${part}.txt
+	python3 ${PHYLOFORMER_DIR}make_tensors.py -dm ${PHYLOFORMER_DIR}${DATA_DIR}dis_mat/ -asr ${PHYLOFORMER_DIR}${DATA_DIR}partial_lhs/trimmed/ -o ${PHYLOFORMER_DIR}${DATA_DIR}dataset/ -p ${num_cpus} &> ${PHYLOFORMER_DIR}${SCRIPTS_DIR}log_make_tensor_${MODE}_${part}.txt
 	
 	# delete trimmed partial lhs
 	for file in ${PHYLOFORMER_DIR}${DATA_DIR}partial_lhs/trimmed/*; do rm "$file"; done 
