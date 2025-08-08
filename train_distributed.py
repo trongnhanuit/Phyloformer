@@ -155,8 +155,8 @@ class LightningAxialTransformer(lightning.LightningModule):
         self.criterion = criterion
         self.batch_size = batch_size
 
-        self.save_hyperparameters()
-        # self.save_hyperparameters(ignore=["criterion"])
+        # self.save_hyperparameters()
+        self.save_hyperparameters(ignore=["criterion"])
 
     def configure_optimizers(self):
         optimizer = self.optim_func(self.parameters(), lr=self.lr)
@@ -518,7 +518,7 @@ if __name__ == "__main__":
             dirpath=os.path.join(args.output_dir, f"checkpoints_{identifier}"),
             filename="{epoch}-{step}-{val_loss:.4f}-{train_loss:.4f}",
             save_top_k=-1,  # Keep all checkpoints
-            save_last=True,  # Add symbolic link to point to last checkpoint
+            #save_last=True,  # Add symbolic link to point to last checkpoint # NHANLT we can easily extract the last one and avoid duplication
             every_n_train_steps=VAL_CHECK_STEPS,
             save_on_train_epoch_end=False,  # Save after validation so the value is correct in filename
         )
